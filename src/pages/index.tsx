@@ -7,8 +7,8 @@ import * as jose from "jose";
 import Spotify from "@/services/spotify";
 
 const inter = Inter({ subsets: ["latin"] });
-const secret = process?.env?.NEXT_PUBLIC_SECRET
-  ? jose.base64url.decode(process.env.NEXT_PUBLIC_SECRET)
+const challengeSecret = process?.env?.NEXT_PUBLIC_CHALLENGE_SECRET
+  ? jose.base64url.decode(process.env.NEXT_PUBLIC_CHALLENGE_SECRET)
   : null;
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
   const router = useRouter();
   const { code: spotifyTokenParam, challengeToken: challengeTokenParam } =
     router.query;
-  const spotify = new Spotify();
+  const spotify = new Spotify(spotifyTokenParam);
 
   useEffect(() => {
     // TODO: Check if token expired
@@ -46,10 +46,14 @@ export default function Home() {
   };
 
   const startChallenge = async () => {
-    if (challengeTokenLocal && secret) {
-      const { payload } = await jose.jwtDecrypt(challengeTokenLocal, secret, {
-        issuer: "Spotify Ranks",
-      });
+    if (challengeTokenLocal && challengeSecret) {
+      const { payload } = await jose.jwtDecrypt(
+        challengeTokenLocal,
+        challengeSecret,
+        {
+          issuer: "Spotify Ranks",
+        }
+      );
       setChallengePayload(payload);
       console.log(payload);
     }
@@ -57,15 +61,22 @@ export default function Home() {
 
   const createNewGame = async () => {
     console.log("creating new game...");
-    if (secret) {
-      const jwt = await new jose.EncryptJWT(getSpotifyRanks())
-        .setProtectedHeader({ alg: "dir", enc: "A128CBC-HS256" })
-        .setIssuer("Spotify Ranks")
-        .encrypt(secret);
+    const accessToken = await spotify.getAccessToken();
+    // console.log(accessToken);
+    if (accessToken) {
+      console.log(challengeSecret);
+      if (challengeSecret) {
+        const topArtists = await spotify.getTopArtists();
+        console.log(topArtists);
+        const jwt = await new jose.EncryptJWT(topArtists)
+          .setProtectedHeader({ alg: "dir", enc: "A128CBC-HS256" })
+          .setIssuer("Spotify Ranks")
+          .encrypt(challengeSecret);
 
-      console.log(jwt);
+        console.log(jwt);
 
-      console.log(`Sharable Link: localhost:3000?challengeToken=${jwt}`);
+        console.log(`Sharable Link: localhost:3000?challengeToken=${jwt}`);
+      }
     }
   };
 
@@ -81,6 +92,11 @@ export default function Home() {
 
   const onSpotifyLogin = () => {
     spotify.authenticate();
+  };
+
+  const renderArtists = async () => {
+    console.log(await spotify.getTopArtists());
+    return <></>;
   };
 
   return (
