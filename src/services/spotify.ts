@@ -81,11 +81,14 @@ export default class Spotify {
       return;
     }
     console.log(this.accessToken);
-    const res = await fetch(`https://api.spotify.com/v1/me/top/artists`, {
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    });
+    const res = await fetch(
+      `https://api.spotify.com/v1/me/top/artists?offset=0&limit=10`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      }
+    );
     let data = await res.json();
     return { data: data.items };
   };
