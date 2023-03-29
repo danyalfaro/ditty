@@ -1,15 +1,37 @@
 import Head from "next/head";
-import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import * as jose from "jose";
 import Spotify from "@/services/spotify";
+import { ChallengePayload, TopArtistResponse } from "@/shared/models";
 
-const inter = Inter({ subsets: ["latin"] });
-const secret = process?.env?.NEXT_PUBLIC_SECRET
-  ? jose.base64url.decode(process.env.NEXT_PUBLIC_SECRET)
-  : null;
+export const decodeChallengeToken = (token: string): string => {
+  console.log("Decoding...");
+  const decoded = Buffer.from(token, "hex").toString();
+  console.log(decoded);
+  return decoded;
+};
+
+export const encodeChallengeToken = (
+  challengePayload: ChallengePayload
+): string => {
+  const payload = JSON.stringify(challengePayload);
+  console.log("Encoding: ", payload);
+  const encoded = Buffer.from(payload).toString("hex");
+  console.log(encoded);
+  decodeChallengeToken(encoded);
+  return encoded;
+};
+
+const spotifyResponseToChallengePayload = (
+  response: TopArtistResponse
+): ChallengePayload => {
+  const challengePayload: ChallengePayload = {
+    challenger: "Daniel Alfaro",
+    topArtists: response.map((artist) => artist.id),
+  };
+  return challengePayload;
+};
 
 export default function Home() {
   const [challengeTokenLocal, setChallengeTokenLocal] = useState("");
@@ -17,7 +39,7 @@ export default function Home() {
   const router = useRouter();
   const { code: spotifyTokenParam, challengeToken: challengeTokenParam } =
     router.query;
-  const spotify = new Spotify();
+  const spotify = new Spotify(spotifyTokenParam);
 
   useEffect(() => {
     // TODO: Check if token expired
@@ -46,37 +68,23 @@ export default function Home() {
   };
 
   const startChallenge = async () => {
-    if (challengeTokenLocal && secret) {
-      const { payload } = await jose.jwtDecrypt(challengeTokenLocal, secret, {
-        issuer: "Spotify Ranks",
-      });
-      setChallengePayload(payload);
-      console.log(payload);
+    if (challengeTokenLocal) {
+      const challengePayload = decodeChallengeToken(challengeTokenLocal);
+      setChallengePayload(challengePayload);
+      console.log(challengePayload);
     }
   };
 
   const createNewGame = async () => {
     console.log("creating new game...");
-    if (secret) {
-      const jwt = await new jose.EncryptJWT(getSpotifyRanks())
-        .setProtectedHeader({ alg: "dir", enc: "A128CBC-HS256" })
-        .setIssuer("Spotify Ranks")
-        .encrypt(secret);
-
-      console.log(jwt);
-
-      console.log(`Sharable Link: localhost:3000?challengeToken=${jwt}`);
+    const accessToken = await spotify.getAccessToken();
+    if (accessToken) {
+      const topArtists = await spotify.getTopArtists();
+      const challengePayload = encodeChallengeToken(
+        spotifyResponseToChallengePayload(topArtists)
+      );
+      console.log("CREATE GAME CHALLENGE PAYLOAD: ", challengePayload);
     }
-  };
-
-  const getSpotifyRanks = () => {
-    return {
-      topArtists: [
-        { id: 231231, name: "Bad Bunny" },
-        { id: 201232, name: "Arcangel" },
-        { id: 893223, name: "Ednita Nazario" },
-      ],
-    };
   };
 
   const onSpotifyLogin = () => {
