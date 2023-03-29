@@ -1,9 +1,5 @@
 import axios, { AxiosInstance } from "axios";
 
-enum SpotifyErrors {
-  "invalid_grant",
-}
-
 export default class Spotify {
   redirectURI: string | undefined;
   clientId: string | undefined;
@@ -26,24 +22,6 @@ export default class Spotify {
       timeout: 10000,
       headers: { Authorization: `Bearer ${this.accessToken}` },
     });
-
-    this.spotifyAPI.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        const originalRequest = error.config;
-        console.log(error);
-
-        // if (error.response.status === 401 && !originalRequest._retry) {
-        //   originalRequest._retry = true;
-        //   return this.refreshAccessToken().then(() => {
-        //     originalRequest.headers.Authorization = `Bearer ${this.accessToken}`;
-        //     return axios(originalRequest);
-        //   });
-        // }
-
-        return Promise.reject(error);
-      }
-    );
   }
 
   authenticate = (): void => {
@@ -87,34 +65,38 @@ export default class Spotify {
         config.headers.Authorization = `Bearer ${this.accessToken}`;
         return config;
       });
+
+      // TODO: REfresh access token when expired.
+
+      // this.spotifyAPI.interceptors.response.use(async (res) => {
+      //   console.log(res);
+      //   const isExpired = res?.data?.error?.status === 401;
+      //   console.log(isExpired);
+
+      //   if (!isExpired) return res;
+
+      //   const response = await axios.post(
+      //     "https://accounts.spotify.com/api/token",
+      //     new URLSearchParams({
+      //       grant_type: "refresh_token",
+      //       refresh_token: `${this.refreshToken}`,
+      //     }),
+      //     {
+      //       headers: {
+      //         Authorization:
+      //           "Basic " +
+      //           new Buffer(this.clientId + ":" + this.clientSecret).toString(
+      //             "base64"
+      //           ),
+      //         "Content-Type": "application/x-www-form-urlencoded",
+      //       },
+      //     }
+      //   );
+      //   this.accessToken = response.data.access_token;
+      //   return res;
+      // });
     }
     return this.accessToken;
-  };
-
-  private refreshAccessToken = async () => {
-    try {
-      const response = await axios.post(
-        "https://accounts.spotify.com/api/token",
-        new URLSearchParams({
-          grant_type: "refresh_token",
-          refresh_token: `${this.refreshToken}`,
-        }),
-        {
-          headers: {
-            Authorization:
-              "Basic " +
-              new Buffer(this.clientId + ":" + this.clientSecret).toString(
-                "base64"
-              ),
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-      this.accessToken = response.data.access_token;
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
   };
 
   getTopArtists = async (): Promise<any> => {
@@ -123,7 +105,13 @@ export default class Spotify {
       return;
     }
     const res = await this.spotifyAPI.get(`me/top/artists?offset=0&limit=10`);
-    let data = res.data;
-    return { data: data.items };
+    return res.data.items;
+  };
+
+  searchArtists = async (query: string) => {
+    const res = await this.spotifyAPI.get(
+      `https://api.spotify.com/v1/search?type=artist&q=${query}`
+    );
+    return res.data;
   };
 }

@@ -29,9 +29,7 @@ export type Artist = {
   uri: string;
 };
 
-export type TopArtistResponse = {
-  data: Artist[];
-};
+export type TopArtistResponse = Artist[];
 
 export type ChallengePayload = {
   challenger: string;

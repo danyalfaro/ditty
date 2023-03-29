@@ -28,7 +28,7 @@ const spotifyResponseToChallengePayload = (
 ): ChallengePayload => {
   const challengePayload: ChallengePayload = {
     challenger: "Daniel Alfaro",
-    topArtists: response.data.map((artist) => artist.id),
+    topArtists: response.map((artist) => artist.id),
   };
   return challengePayload;
 };
@@ -80,15 +80,10 @@ export default function Home() {
     const accessToken = await spotify.getAccessToken();
     if (accessToken) {
       const topArtists = await spotify.getTopArtists();
-      console.log(topArtists);
       const challengePayload = encodeChallengeToken(
         spotifyResponseToChallengePayload(topArtists)
       );
       console.log("CREATE GAME CHALLENGE PAYLOAD: ", challengePayload);
-      console.log(
-        "CREATE GAME CHALLENGE PAYLOAD DECODED: ",
-        decodeChallengeToken(challengePayload)
-      );
     }
   };
 
