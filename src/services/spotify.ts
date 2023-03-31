@@ -1,7 +1,7 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosError, AxiosInstance } from "axios";
 
 export default class Spotify {
-  redirectURI: string | undefined;
+  // redirectURI: string | undefined;
   clientId: string | undefined;
   spotifyTokenParam: string | string[] | undefined;
   clientSecret: string | undefined;
@@ -10,7 +10,7 @@ export default class Spotify {
   spotifyAPI: AxiosInstance;
 
   constructor(spotifyTokenParam: string | string[] | undefined) {
-    this.redirectURI = process.env.NEXT_PUBLIC_REDIRECT_URI;
+    // this.redirectURI = process.env.NEXT_PUBLIC_REDIRECT_URI;
     this.clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
     this.clientSecret = process.env.NEXT_PUBLIC_SECRET;
     this.spotifyTokenParam = spotifyTokenParam;
@@ -24,47 +24,57 @@ export default class Spotify {
     });
   }
 
-  authenticate = (): void => {
-    window.open(
-      `https://accounts.spotify.com/authorize?response_type=code&redirect_uri=${this.redirectURI}&client_id=${this.clientId}&scope=user-top-read`,
-      "_self"
-    );
+  authenticate = (redirectURI: string | undefined): void => {
+    // TODO: Setup default redirect URI.
+    if (redirectURI) {
+      window.open(
+        `https://accounts.spotify.com/authorize?response_type=code&redirect_uri=${redirectURI}&client_id=${this.clientId}&scope=user-top-read`,
+        "_self"
+      );
+    }
   };
 
   storeToken = (label: string, value: string) => {
     localStorage.setItem(label, value);
   };
 
-  getAccessToken = async () => {
-    if (!this.accessToken) {
-      const response = await axios.post(
-        "https://accounts.spotify.com/api/token",
-        new URLSearchParams({
-          code: `${this.spotifyTokenParam}`,
-          redirect_uri: `${this.redirectURI}`,
-          grant_type: "authorization_code",
-          client_id: `${this.clientId}`,
-        }),
-        {
-          headers: {
-            Authorization:
-              "Basic " +
-              new Buffer(this.clientId + ":" + this.clientSecret).toString(
-                "base64"
-              ),
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        }
-      );
-      let res = await response.data;
-      this.storeToken("accessToken", res.access_token);
-      this.storeToken("refreshToken", res.refresh_token);
-      this.accessToken = res.access_token;
-      this.refreshToken = res.refresh_token;
-      this.spotifyAPI.interceptors.request.use((config) => {
-        config.headers.Authorization = `Bearer ${this.accessToken}`;
-        return config;
-      });
+  getAccessToken = async (redirectURI: string | undefined) => {
+    console.log("ACCESS TOKEN FROM getAccessToken()", this.accessToken);
+    if (!this.accessToken && redirectURI) {
+      try {
+        const response = await axios.post(
+          "https://accounts.spotify.com/api/token",
+          new URLSearchParams({
+            code: `${this.spotifyTokenParam}`,
+            redirect_uri: `${redirectURI}`,
+            grant_type: "authorization_code",
+            client_id: `${this.clientId}`,
+          }),
+          {
+            headers: {
+              Authorization:
+                "Basic " +
+                new Buffer(this.clientId + ":" + this.clientSecret).toString(
+                  "base64"
+                ),
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        );
+        let res = await response.data;
+        // this.storeToken("accessToken", res.access_token);
+        // this.storeToken("refreshToken", res.refresh_token);
+        this.accessToken = res.access_token;
+        this.refreshToken = res.refresh_token;
+        this.spotifyAPI.interceptors.request.use((config) => {
+          config.headers.Authorization = `Bearer ${this.accessToken}`;
+          return config;
+        });
+      } catch (e) {
+        const error = e as AxiosError;
+        console.log(error.isAxiosError);
+        // Need to handle this error
+      }
 
       // TODO: REfresh access token when expired.
 
@@ -101,7 +111,9 @@ export default class Spotify {
 
   getTopArtists = async (): Promise<any> => {
     if (!this.accessToken) {
-      this.getAccessToken();
+      const redirectURI: string | undefined =
+        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+      this.getAccessToken(redirectURI);
       return;
     }
     const res = await this.spotifyAPI.get(`me/top/artists?offset=0&limit=10`);

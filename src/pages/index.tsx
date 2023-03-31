@@ -4,24 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Spotify from "@/services/spotify";
 import { ChallengePayload, TopArtistResponse } from "@/shared/models";
-
-export const decodeChallengeToken = (token: string): string => {
-  console.log("Decoding...");
-  const decoded = Buffer.from(token, "hex").toString();
-  console.log(decoded);
-  return decoded;
-};
-
-export const encodeChallengeToken = (
-  challengePayload: ChallengePayload
-): string => {
-  const payload = JSON.stringify(challengePayload);
-  console.log("Encoding: ", payload);
-  const encoded = Buffer.from(payload).toString("hex");
-  console.log(encoded);
-  decodeChallengeToken(encoded);
-  return encoded;
-};
+import { decodeChallengeToken, encodeChallengeToken } from "@/shared/util";
 
 const spotifyResponseToChallengePayload = (
   response: TopArtistResponse
@@ -77,18 +60,15 @@ export default function Home() {
 
   const createNewGame = async () => {
     console.log("creating new game...");
-    const accessToken = await spotify.getAccessToken();
-    if (accessToken) {
-      const topArtists = await spotify.getTopArtists();
-      const challengePayload = encodeChallengeToken(
-        spotifyResponseToChallengePayload(topArtists)
-      );
-      console.log("CREATE GAME CHALLENGE PAYLOAD: ", challengePayload);
-    }
+    const redirectURI: string | undefined =
+      process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+    await spotify.getAccessToken(redirectURI);
   };
 
   const onSpotifyLogin = () => {
-    spotify.authenticate();
+    const redirectURI: string | undefined =
+      process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+    spotify.authenticate(redirectURI);
   };
 
   return (
@@ -107,7 +87,6 @@ export default function Home() {
               <button className={styles.card} onClick={onSpotifyLogin}>
                 Create Game
               </button>
-              <p>After Create Game, Login to Spotify...</p>
             </>
           ) : (
             <></>
