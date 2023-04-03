@@ -16,9 +16,6 @@ export async function getServerSideProps({ query }: any) {
   const [accessToken, refreshToken] = await spotify.getAccessToken(redirectURI);
   if (accessToken) {
     user = await spotify.getUserProfile();
-    // challengeToken = encodeChallengeToken(
-    //   spotifyResponseToChallengePayload(topArtists)
-    // );
   }
   return {
     props: { user, accessToken, refreshToken },
@@ -30,10 +27,6 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
     useState<ChallengePayload | null>(null);
   const spotify = new Spotify();
   const router = useRouter();
-
-  const challengeTokenToShareableLink = (challengeToken: string): string => {
-    return `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`;
-  };
 
   useEffect(() => {
     storeToken("accessToken", accessToken);

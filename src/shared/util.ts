@@ -1,5 +1,12 @@
 import { ChallengePayload } from "./models";
 
+export const challengeTokenToShareableLink = (
+  challengeToken: string
+): string => {
+  return `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`;
+};
+
+
 export const decodeChallengeToken = (token: string): string => {
   console.log("Decoding...");
   const decoded = Buffer.from(token, "hex").toString();
