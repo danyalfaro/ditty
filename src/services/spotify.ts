@@ -46,10 +46,6 @@ export default class Spotify {
     }
   };
 
-  // storeToken = (label: string, value: string) => {
-  //   localStorage.setItem(label, value);
-  // };
-
   getAccessToken = async (redirectURI: string | undefined) => {
     if (!this.accessToken && redirectURI) {
       try {
