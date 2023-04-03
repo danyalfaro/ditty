@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
-import { encodeChallengeToken } from "@/shared/util";
-import { ChallengePayload, TopArtistResponse } from "@/shared/models";
-import spotify from "@/services/spotify";
+import { FaWhatsapp, FaSms } from "react-icons/fa";
 
 export const SocialLinks = () => {
-  return <div>Showing Social Links!!!</div>;
+  return (
+    <>
+      <div>
+        <FaWhatsapp />
+        <FaSms />
+      </div>
+    </>
+  );
 };
 
 export default SocialLinks;

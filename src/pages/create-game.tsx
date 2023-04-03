@@ -28,10 +28,6 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
   const spotify = new Spotify();
   const router = useRouter();
 
-  const challengeTokenToShareableLink = (challengeToken: string): string => {
-    return `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`;
-  };
-
   useEffect(() => {
     storeToken("accessToken", accessToken);
     storeToken("refreshToken", refreshToken);
