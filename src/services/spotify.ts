@@ -1,3 +1,4 @@
+import { Artist, LocalStorageToken } from "@/shared/models";
 import axios, { AxiosError, AxiosInstance } from "axios";
 
 export default class Spotify {
@@ -9,7 +10,7 @@ export default class Spotify {
   accessToken: string | null;
   spotifyAPI: AxiosInstance;
 
-  constructor(spotifyTokenParam: string | string[] | undefined) {
+  constructor(spotifyTokenParam?: string | string[] | undefined) {
     // this.redirectURI = process.env.NEXT_PUBLIC_REDIRECT_URI;
     this.clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
     this.clientSecret = process.env.NEXT_PUBLIC_SECRET;
@@ -24,6 +25,17 @@ export default class Spotify {
     });
   }
 
+  getAccessTokenFromStorage() {
+    const localStorageAccessToken = localStorage.getItem("accessToken");
+    if (localStorageAccessToken) {
+      const localStorageAccessTokenJSON: LocalStorageToken = JSON.parse(
+        localStorageAccessToken
+      );
+      return localStorageAccessTokenJSON.token;
+    }
+    return this.accessToken;
+  }
+
   authenticate = (redirectURI: string | undefined): void => {
     // TODO: Setup default redirect URI.
     if (redirectURI) {
@@ -34,12 +46,11 @@ export default class Spotify {
     }
   };
 
-  storeToken = (label: string, value: string) => {
-    localStorage.setItem(label, value);
-  };
+  // storeToken = (label: string, value: string) => {
+  //   localStorage.setItem(label, value);
+  // };
 
   getAccessToken = async (redirectURI: string | undefined) => {
-    console.log("ACCESS TOKEN FROM getAccessToken()", this.accessToken);
     if (!this.accessToken && redirectURI) {
       try {
         const response = await axios.post(
@@ -62,8 +73,6 @@ export default class Spotify {
           }
         );
         let res = await response.data;
-        // this.storeToken("accessToken", res.access_token);
-        // this.storeToken("refreshToken", res.refresh_token);
         this.accessToken = res.access_token;
         this.refreshToken = res.refresh_token;
         this.spotifyAPI.interceptors.request.use((config) => {
@@ -106,16 +115,26 @@ export default class Spotify {
       //   return res;
       // });
     }
-    return this.accessToken;
+    return [this.accessToken, this.refreshToken];
   };
 
-  getTopArtists = async (): Promise<any> => {
-    if (!this.accessToken) {
+  getUserProfile = async (): Promise<any> => {
+    const res = await this.spotifyAPI.get(`me/`);
+    return res.data;
+  };
+
+  getTopArtists = async (): Promise<Artist[]> => {
+    let accessToken = this.getAccessTokenFromStorage();
+    if (!accessToken) {
       const redirectURI: string | undefined =
         process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
       this.getAccessToken(redirectURI);
-      return;
+      return [];
     }
+    this.spotifyAPI.interceptors.request.use((config) => {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+      return config;
+    });
     const res = await this.spotifyAPI.get(`me/top/artists?offset=0&limit=10`);
     return res.data.items;
   };

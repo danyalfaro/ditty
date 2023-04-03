@@ -35,3 +35,8 @@ export type ChallengePayload = {
   challenger: string;
   topArtists: string[];
 };
+
+export type LocalStorageToken = {
+  dateStamp: string; //ISO String,
+  token: string;
+};

@@ -24,19 +24,6 @@ export default function Home() {
     router.query;
   const spotify = new Spotify(spotifyTokenParam);
 
-  useEffect(() => {
-    // TODO: Check if token expired
-    if (challengeTokenParam) {
-      storeToken(challengeTokenParam);
-    } else if (spotifyTokenParam) {
-      checkChallengeTokenLocal();
-    }
-  }, [challengeTokenParam, spotifyTokenParam]);
-
-  const storeToken = (token: string | string[]) => {
-    localStorage.setItem("challengeToken", token.toString());
-  };
-
   const clearToken = (token: string | string[]) => {
     localStorage.removeItem("challengeToken");
   };
@@ -85,43 +72,11 @@ export default function Home() {
             <>
               <h2>Welcome!</h2>
               <button className={styles.card} onClick={onSpotifyLogin}>
-                Create Game
+                Create Game This One
               </button>
             </>
           ) : (
             <></>
-          )}
-          {!spotifyTokenParam && challengeTokenParam ? (
-            <>
-              <h2>Join the game sent by ...</h2>
-              <button className={styles.card} onClick={onSpotifyLogin}>
-                Go Play
-              </button>
-              <p>After Go Play, Login to Spotify...</p>
-            </>
-          ) : (
-            <></>
-          )}
-          {spotifyTokenParam && !challengeTokenLocal ? (
-            <>
-              <button className={styles.card} onClick={createNewGame}>
-                Create Game
-              </button>
-              <p>After Create Game, create the sharable Link</p>
-            </>
-          ) : (
-            ""
-          )}
-          {spotifyTokenParam && challengeTokenLocal ? (
-            <>
-              <button className={styles.card} onClick={startChallenge}>
-                Start the Game!
-              </button>
-              <p>After Start the Game, render Game UI</p>
-              <div>{JSON.stringify(challengePayload)}</div>
-            </>
-          ) : (
-            ""
           )}
         </div>
       </main>

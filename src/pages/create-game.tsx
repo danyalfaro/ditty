@@ -1,63 +1,91 @@
 import styles from "@/styles/Home.module.css";
-import SocialLinks from "@/components/SocialLinks";
 import Spotify from "@/services/spotify";
-import { encodeChallengeToken } from "@/shared/util";
 import { ChallengePayload, TopArtistResponse } from "@/shared/models";
-import { useEffect } from "react";
-
-const spotifyResponseToChallengePayload = (
-  response: TopArtistResponse
-): ChallengePayload => {
-  const challengePayload: ChallengePayload = {
-    challenger: "Daniel Alfaro",
-    topArtists: response.map((artist) => artist.id),
-  };
-  return challengePayload;
-};
+import { useEffect, useState } from "react";
+import { encodeChallengeToken } from "@/shared/util";
+import { useRouter } from "next/router";
 
 export async function getServerSideProps({ query }: any) {
-  console.log("RENDERING HERE...");
   const { code } = query;
-  let challengeToken = {};
+  let user = {};
   if (!code) return { props: {} };
   const spotify = new Spotify(code);
   console.log("CREATING NEW GAME...");
   const redirectURI: string | undefined =
     process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
-  const accessToken = await spotify.getAccessToken(redirectURI);
-  console.log("ACCESS TOKEN: ", accessToken);
+  const [accessToken, refreshToken] = await spotify.getAccessToken(redirectURI);
   if (accessToken) {
-    const topArtists = await spotify.getTopArtists();
-    challengeToken = encodeChallengeToken(
-      spotifyResponseToChallengePayload(topArtists)
-    );
+    user = await spotify.getUserProfile();
+    // challengeToken = encodeChallengeToken(
+    //   spotifyResponseToChallengePayload(topArtists)
+    // );
   }
   return {
-    props: { code, challengeToken },
+    props: { user, accessToken, refreshToken },
   };
 }
 
-export const CreateGame = ({ challengeToken }: any) => {
+export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
+  const [challengePayload, setChallengePayload] =
+    useState<ChallengePayload | null>(null);
+  const spotify = new Spotify();
+  const router = useRouter();
+
   const challengeTokenToShareableLink = (challengeToken: string): string => {
     return `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`;
   };
 
   useEffect(() => {
-    console.log("RENDERING IN CLIENT");
+    storeToken("accessToken", accessToken);
+    storeToken("refreshToken", refreshToken);
   }, []);
+
+  const storeToken = (label: string, token: string | string[]) => {
+    localStorage.setItem(
+      label,
+      JSON.stringify({ dateStamp: new Date(), token: token.toString() })
+    );
+  };
+
+  const spotifyResponseToChallengePayload = (
+    response: TopArtistResponse
+  ): ChallengePayload => {
+    const challengePayload: ChallengePayload = {
+      challenger: `${user.display_name}`,
+      topArtists: response.map((artist) => artist.id),
+    };
+    return challengePayload;
+  };
+
+  const getTopArtists = async (): Promise<{
+    challengePayload: ChallengePayload;
+    challengeToken: string;
+  }> => {
+    console.log("Getting top artists");
+    const topArtists = await spotify.getTopArtists();
+    const challengePayload = spotifyResponseToChallengePayload(topArtists);
+    const challengeToken = encodeChallengeToken(challengePayload);
+    return {
+      challengePayload,
+      challengeToken,
+    };
+  };
+
+  const onTopArtistsSelection = async () => {
+    const { challengePayload, challengeToken } = await getTopArtists();
+    setChallengePayload(challengePayload);
+    console.log(challengePayload, challengeToken);
+    router.push(
+      `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`
+    );
+  };
 
   return (
     <main className={styles.main}>
       <div>Can anyone guess your Top Ditty? Share Your Link To Find Out...</div>
-      <button
-        type="button"
-        onClick={() =>
-          console.log(challengeTokenToShareableLink(challengeToken))
-        }
-      >
-        Console Log Shareble URL
+      <button type="button" onClick={onTopArtistsSelection}>
+        My top Aritsts
       </button>
-      <SocialLinks />
     </main>
   );
 };

@@ -8,12 +8,14 @@ export const decodeChallengeToken = (token: string): string => {
 };
 
 export const encodeChallengeToken = (
-  challengePayload: ChallengePayload
+  challengePayload: ChallengePayload | null
 ): string => {
-  const payload = JSON.stringify(challengePayload);
-  console.log("Encoding: ", payload);
-  const encoded = Buffer.from(payload).toString("hex");
-  console.log(encoded);
-  decodeChallengeToken(encoded);
-  return encoded;
+  if (challengePayload) {
+    const payload = JSON.stringify(challengePayload);
+    console.log("Encoding: ", payload);
+    const encoded = Buffer.from(payload).toString("hex");
+    console.log(encoded);
+    decodeChallengeToken(encoded);
+    return encoded;
+  } else return "";
 };
