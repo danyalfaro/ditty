@@ -16,9 +16,6 @@ export async function getServerSideProps({ query }: any) {
   const [accessToken, refreshToken] = await spotify.getAccessToken(redirectURI);
   if (accessToken) {
     user = await spotify.getUserProfile();
-    // challengeToken = encodeChallengeToken(
-    //   spotifyResponseToChallengePayload(topArtists)
-    // );
   }
   return {
     props: { user, accessToken, refreshToken },
