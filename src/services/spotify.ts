@@ -36,7 +36,7 @@ export default class Spotify {
     return this.accessToken;
   }
 
-  authenticate = (redirectURI: string | undefined): void => {
+  login = (redirectURI: string | undefined): void => {
     // TODO: Setup default redirect URI.
     if (redirectURI) {
       window.open(
@@ -136,9 +136,20 @@ export default class Spotify {
   };
 
   searchArtists = async (query: string) => {
+    let accessToken = this.getAccessTokenFromStorage();
+    if (!accessToken) {
+      const redirectURI: string | undefined =
+        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+      this.getAccessToken(redirectURI);
+      return [];
+    }
+    this.spotifyAPI.interceptors.request.use((config) => {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+      return config;
+    });
     const res = await this.spotifyAPI.get(
       `https://api.spotify.com/v1/search?type=artist&q=${query}`
     );
-    return res.data;
+    return res.data.artists.items;
   };
 }

@@ -7,11 +7,11 @@ export const challengeTokenToShareableLink = (
 };
 
 
-export const decodeChallengeToken = (token: string): string => {
+export const decodeChallengeToken = (token: string): ChallengePayload => {
   console.log("Decoding...");
   const decoded = Buffer.from(token, "hex").toString();
   console.log(decoded);
-  return decoded;
+  return JSON.parse(decoded);
 };
 
 export const encodeChallengeToken = (

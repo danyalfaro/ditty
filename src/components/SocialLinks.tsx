@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { FaWhatsapp, FaSms } from "react-icons/fa";
 
 export const SocialLinks = () => {
