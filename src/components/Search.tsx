@@ -14,8 +14,9 @@ export const Search = ({ verifyCallback }: any) => {
     // TODO: add debounce
     if (query.length > 1) {
       const res = await spotify.searchArtists(query);
-      console.log(res);
       setResponse(res);
+    }else if(query.length === 0){
+      setResponse(null);
     }
   };
 
