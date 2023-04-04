@@ -33,7 +33,6 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
 
   return (
     <main className={styles.main}>
-      <div>Challenge page working!</div>
       <h1>{props.challengePayload.challenger}</h1>
       <Search verifyCallback={verifyCallback} />
       <Board challengePayload={props.challengePayload} />
