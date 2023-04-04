@@ -10,7 +10,6 @@ export const challengeTokenToShareableLink = (
 export const decodeChallengeToken = (token: string): ChallengePayload => {
   console.log("Decoding...");
   const decoded = Buffer.from(token, "hex").toString();
-  console.log(decoded);
   return JSON.parse(decoded);
 };
 
@@ -21,7 +20,6 @@ export const encodeChallengeToken = (
     const payload = JSON.stringify(challengePayload);
     console.log("Encoding: ", payload);
     const encoded = Buffer.from(payload).toString("hex");
-    console.log(encoded);
     decodeChallengeToken(encoded);
     return encoded;
   } else return "";

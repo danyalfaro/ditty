@@ -22,11 +22,6 @@ export const Search = ({ verifyCallback }: any) => {
     verifyCallback(artist.id);
   };
 
-  const verify = (value: string): boolean => {
-    if (selection) return selection.id === value;
-    return false;
-  };
-
   return (
     <>
       <div>
