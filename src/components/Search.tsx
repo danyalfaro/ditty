@@ -3,7 +3,7 @@ import { Artist } from "@/shared/models";
 import Image from "next/image";
 import { ChangeEvent, useState } from "react";
 
-export const Search = ({ verifyCallback }: any) => {
+export const Search = ({ isTopDittyMatch }: any) => {
   const spotify = new Spotify();
   const [response, setResponse] = useState<Artist[] | null>(null);
   const [selection, setSelection] = useState<Artist | null>(null);
@@ -15,14 +15,14 @@ export const Search = ({ verifyCallback }: any) => {
     if (query.length > 1) {
       const res = await spotify.searchArtists(query);
       setResponse(res);
-    }else if(query.length === 0){
+    } else if (query.length === 0) {
       setResponse(null);
     }
   };
 
   const handleItemSelection = (artist: Artist) => {
     setSelection(artist);
-    verifyCallback(artist.id);
+    isTopDittyMatch(artist.id);
   };
 
   return (

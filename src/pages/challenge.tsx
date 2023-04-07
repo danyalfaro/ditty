@@ -29,7 +29,7 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
     }
   }, [user, router]);
 
-  const verifyCallback = (id: string): boolean => {
+  const isTopDittyMatch = (id: string): boolean => {
     const { topArtists } = props.challengePayload;
     console.log(
       topArtists.findIndex((artist) => {
@@ -47,7 +47,7 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
     <Layout>
       <h1>{props.challengePayload.challenger}</h1>
       <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
-      <Search verifyCallback={verifyCallback} />
+      <Search isTopDittyMatch={isTopDittyMatch} />
       <Board challengePayload={props.challengePayload} />
       <SocialLinks />
     </Layout>
