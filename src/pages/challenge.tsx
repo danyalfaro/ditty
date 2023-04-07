@@ -2,8 +2,10 @@ import Board from "@/components/Board";
 import Layout from "@/components/Layout";
 import Search from "@/components/Search";
 import SocialLinks from "@/components/SocialLinks";
+import { UserContext } from "@/shared/context";
 import { ChallengePayload } from "@/shared/models";
 import { decodeChallengeToken } from "@/shared/util";
+import { useContext } from "react";
 
 export async function getServerSideProps({ query }: any) {
   const { challengeToken } = query;
@@ -16,6 +18,8 @@ export async function getServerSideProps({ query }: any) {
 }
 
 export const Challenge = (props: { challengePayload: ChallengePayload }) => {
+  const { user, setUser } = useContext(UserContext);
+
   const verifyCallback = (id: string): boolean => {
     const { topArtists } = props.challengePayload;
     console.log(
@@ -33,6 +37,7 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   return (
     <Layout>
       <h1>{props.challengePayload.challenger}</h1>
+      <div className="text-2xl py-6">{`Hello ${user.name}`}</div>
       <Search verifyCallback={verifyCallback} />
       <Board challengePayload={props.challengePayload} />
       <SocialLinks />

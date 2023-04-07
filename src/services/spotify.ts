@@ -1,4 +1,4 @@
-import { Artist, LocalStorageToken } from "@/shared/models";
+import { Artist, LocalStorageToken, User } from "@/shared/models";
 import axios, { AxiosError, AxiosInstance } from "axios";
 
 export default class Spotify {
@@ -8,6 +8,9 @@ export default class Spotify {
   clientSecret: string | undefined;
   refreshToken: string | null;
   accessToken: string | null;
+  tokenType: string;
+  expiresIn: number;
+  lastTokenRefreshDate: Date | null;
   spotifyAPI: AxiosInstance;
 
   constructor(spotifyTokenParam?: string | string[] | undefined) {
@@ -17,11 +20,14 @@ export default class Spotify {
     this.spotifyTokenParam = spotifyTokenParam;
     this.refreshToken = null;
     this.accessToken = null;
+    this.tokenType = "Bearer";
+    this.expiresIn = 0;
+    this.lastTokenRefreshDate = null;
 
     this.spotifyAPI = axios.create({
       baseURL: "https://api.spotify.com/v1/",
       timeout: 10000,
-      headers: { Authorization: `Bearer ${this.accessToken}` },
+      headers: { Authorization: `${this.tokenType} ${this.accessToken}` },
     });
   }
 
@@ -71,8 +77,9 @@ export default class Spotify {
         let res = await response.data;
         this.accessToken = res.access_token;
         this.refreshToken = res.refresh_token;
+        this.tokenType = res.token_type;
         this.spotifyAPI.interceptors.request.use((config) => {
-          config.headers.Authorization = `Bearer ${this.accessToken}`;
+          config.headers.Authorization = `${res.token_type} ${this.accessToken}`;
           return config;
         });
       } catch (e) {
@@ -114,7 +121,7 @@ export default class Spotify {
     return [this.accessToken, this.refreshToken];
   };
 
-  getUserProfile = async (): Promise<any> => {
+  getUserProfile = async (): Promise<User> => {
     const res = await this.spotifyAPI.get(`me/`);
     return res.data;
   };
@@ -128,7 +135,7 @@ export default class Spotify {
       return [];
     }
     this.spotifyAPI.interceptors.request.use((config) => {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      config.headers.Authorization = `${this.tokenType} ${accessToken}`;
       return config;
     });
     const res = await this.spotifyAPI.get(`me/top/artists?offset=0&limit=10`);
@@ -144,7 +151,7 @@ export default class Spotify {
       return [];
     }
     this.spotifyAPI.interceptors.request.use((config) => {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      config.headers.Authorization = `${this.tokenType} ${accessToken}`;
       return config;
     });
     const res = await this.spotifyAPI.get(
