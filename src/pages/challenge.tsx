@@ -5,6 +5,8 @@ import SocialLinks from "@/components/SocialLinks";
 import { UserContext } from "@/shared/context";
 import { ChallengePayload } from "@/shared/models";
 import { decodeChallengeToken } from "@/shared/util";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { useContext } from "react";
 
 export async function getServerSideProps({ query }: any) {
@@ -19,6 +21,13 @@ export async function getServerSideProps({ query }: any) {
 
 export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   const { user, setUser } = useContext(UserContext);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.push(`${process.env.NEXT_PUBLIC_DITTY_URL}`);
+    }
+  }, [user, router]);
 
   const verifyCallback = (id: string): boolean => {
     const { topArtists } = props.challengePayload;
@@ -37,7 +46,7 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   return (
     <Layout>
       <h1>{props.challengePayload.challenger}</h1>
-      <div className="text-2xl py-6">{`Hello ${user.name}`}</div>
+      <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
       <Search verifyCallback={verifyCallback} />
       <Board challengePayload={props.challengePayload} />
       <SocialLinks />
