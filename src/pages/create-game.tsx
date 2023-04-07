@@ -1,16 +1,16 @@
 import Spotify from "@/services/spotify";
 import { ChallengePayload, TopArtistResponse } from "@/shared/models";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { encodeChallengeToken } from "@/shared/util";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
+import { UserContext } from "@/shared/context";
 
 export async function getServerSideProps({ query }: any) {
   const { code } = query;
   let user = {};
   if (!code) return { props: {} };
   const spotify = new Spotify(code);
-  console.log("CREATING NEW GAME...");
   const redirectURI: string | undefined =
     process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
   const [accessToken, refreshToken] = await spotify.getAccessToken(redirectURI);
@@ -27,11 +27,17 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
     useState<ChallengePayload | null>(null);
   const spotify = new Spotify();
   const router = useRouter();
+  const { user: activeUser, setUser } = useContext(UserContext);
 
   useEffect(() => {
-    storeToken("accessToken", accessToken);
-    storeToken("refreshToken", refreshToken);
-  }, []);
+    if (!user || !accessToken || !refreshToken) {
+      router.push(`${process.env.NEXT_PUBLIC_DITTY_URL}`);
+    } else {
+      setUser(user); // Sets the userContext from the value received through SSR.
+      storeToken("accessToken", accessToken);
+      storeToken("refreshToken", refreshToken);
+    }
+  }, [accessToken, activeUser, refreshToken, router, setUser, user]);
 
   const storeToken = (label: string, token: string | string[]) => {
     localStorage.setItem(
@@ -54,7 +60,6 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
     challengePayload: ChallengePayload;
     challengeToken: string;
   }> => {
-    console.log("Getting top artists");
     const topArtists = await spotify.getTopArtists();
     const challengePayload = spotifyResponseToChallengePayload(topArtists);
     const challengeToken = encodeChallengeToken(challengePayload);
@@ -67,7 +72,6 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
   const onTopArtistsSelection = async () => {
     const { challengePayload, challengeToken } = await getTopArtists();
     setChallengePayload(challengePayload);
-    console.log(challengePayload, challengeToken);
     router.push(
       `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`
     );
@@ -76,6 +80,8 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
   return (
     <Layout>
       <div>Can anyone guess your Top Ditty? Share Your Link To Find Out...</div>
+      <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
+
       <button
         type="button"
         onClick={onTopArtistsSelection}

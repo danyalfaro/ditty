@@ -40,3 +40,19 @@ export type LocalStorageToken = {
   dateStamp: string; //ISO String,
   token: string;
 };
+
+export type User = {
+  display_name: string;
+  // external_urls: { spotify: string };
+  // followers: { href: null; total: number };
+  // href: string;
+  id: string;
+  images: string[];
+  type: string; // 'user'
+  uri: string;
+};
+
+export type Tokens = {
+  accessToken: string;
+  refreshToken: string;
+};
