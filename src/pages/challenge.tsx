@@ -1,10 +1,9 @@
 import Board from "@/components/Board";
+import Layout from "@/components/Layout";
 import Search from "@/components/Search";
 import SocialLinks from "@/components/SocialLinks";
 import { ChallengePayload } from "@/shared/models";
 import { decodeChallengeToken } from "@/shared/util";
-import styles from "@/styles/Home.module.css";
-import { useEffect } from "react";
 
 export async function getServerSideProps({ query }: any) {
   const { challengeToken } = query;
@@ -32,12 +31,12 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   };
 
   return (
-    <main className={styles.main}>
+    <Layout>
       <h1>{props.challengePayload.challenger}</h1>
       <Search verifyCallback={verifyCallback} />
       <Board challengePayload={props.challengePayload} />
       <SocialLinks />
-    </main>
+    </Layout>
   );
 };
 

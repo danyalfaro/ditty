@@ -1,9 +1,9 @@
-import styles from "@/styles/Home.module.css";
 import Spotify from "@/services/spotify";
 import { ChallengePayload, TopArtistResponse } from "@/shared/models";
 import { useEffect, useState } from "react";
 import { encodeChallengeToken } from "@/shared/util";
 import { useRouter } from "next/router";
+import Layout from "@/components/Layout";
 
 export async function getServerSideProps({ query }: any) {
   const { code } = query;
@@ -74,12 +74,16 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
   };
 
   return (
-    <main className={styles.main}>
+    <Layout>
       <div>Can anyone guess your Top Ditty? Share Your Link To Find Out...</div>
-      <button type="button" onClick={onTopArtistsSelection}>
-        My top Aritsts
+      <button
+        type="button"
+        onClick={onTopArtistsSelection}
+        className="bg-green-600 text-slate-100 p-4 border-solid rounded-md"
+      >
+        My top Artists
       </button>
-    </main>
+    </Layout>
   );
 };
 

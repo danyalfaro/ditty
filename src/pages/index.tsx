@@ -1,10 +1,9 @@
 import Head from "next/head";
-import styles from "@/styles/Home.module.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import Spotify from "@/services/spotify";
 import { ChallengePayload, TopArtistResponse } from "@/shared/models";
-import { decodeChallengeToken, encodeChallengeToken } from "@/shared/util";
+import Layout from "@/components/Layout";
 
 const spotifyResponseToChallengePayload = (
   response: TopArtistResponse
@@ -37,14 +36,6 @@ export default function Home() {
     return false;
   };
 
-  const startChallenge = async () => {
-    if (challengeTokenLocal) {
-      const challengePayload = decodeChallengeToken(challengeTokenLocal);
-      setChallengePayload(challengePayload);
-      console.log(challengePayload);
-    }
-  };
-
   const createNewGame = async () => {
     console.log("creating new game...");
     const redirectURI: string | undefined =
@@ -66,20 +57,23 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.grid}>
+      <Layout>
+        <div className="flex flex-col justify-center text-center">
           {!spotifyTokenParam && !challengeTokenParam ? (
             <>
               <h2>Welcome!</h2>
-              <button className={styles.card} onClick={onSpotifyLogin}>
-                Create Game This One
+              <button
+                className="bg-green-600 text-slate-100 p-4 border-solid rounded-md"
+                onClick={onSpotifyLogin}
+              >
+                Create Game
               </button>
             </>
           ) : (
             <></>
           )}
         </div>
-      </main>
+      </Layout>
     </>
   );
 }
