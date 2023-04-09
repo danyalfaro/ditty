@@ -7,7 +7,7 @@ export const Board = ({ challengePayload }: any) => {
 
   return (
     <>
-      <div>SHOWING CHALLENGE TO PLAY!!!</div>
+      <div></div>
     </>
   );
 };

@@ -3,10 +3,10 @@ import Layout from "@/components/Layout";
 import Search from "@/components/Search";
 import SocialLinks from "@/components/SocialLinks";
 import { UserContext } from "@/shared/context";
-import { ChallengePayload } from "@/shared/models";
+import { Artist, ChallengePayload } from "@/shared/models";
 import { decodeChallengeToken } from "@/shared/util";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useContext } from "react";
 
 export async function getServerSideProps({ query }: any) {
@@ -21,6 +21,7 @@ export async function getServerSideProps({ query }: any) {
 
 export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   const { user, setUser } = useContext(UserContext);
+  const [matchedItems, setMatchedItems] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,25 +30,38 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
     }
   }, [user, router]);
 
+  const selectedItem = (item: any) => {
+    if (isTopDittyMatch(item.id) && !isDuplicateMatch(item)) {
+      setMatchedItems((previousMatchedItems) => [
+        ...previousMatchedItems,
+        ...[item],
+      ]);
+    }
+  };
+
   const isTopDittyMatch = (id: string): boolean => {
     const { topArtists } = props.challengePayload;
-    console.log(
+    return (
       topArtists.findIndex((artist) => {
         return artist === id;
       }) > 0
     );
-    return (
-      topArtists.findIndex((artist) => {
-        artist === id;
-      }) > 0
-    );
+  };
+
+  const isDuplicateMatch = (item: Artist) => {
+    return !!matchedItems.find((artist) => {
+      return artist.id === item.id;
+    });
   };
 
   return (
     <Layout>
       <h1>{props.challengePayload.challenger}</h1>
       <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
-      <Search isTopDittyMatch={isTopDittyMatch} />
+      {matchedItems.map((item) => {
+        return <div key={item.id}>{item.name}</div>;
+      })}
+      <Search selectedItem={selectedItem} />
       <Board challengePayload={props.challengePayload} />
       <SocialLinks />
     </Layout>
