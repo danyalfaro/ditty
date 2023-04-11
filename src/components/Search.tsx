@@ -1,12 +1,18 @@
 import Spotify from "@/services/spotify";
 import { Artist } from "@/shared/models";
 import Image from "next/image";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
-export const Search = ({ selectedItem }: any) => {
+export const Search = ({ selectedItem, triedItems }: any) => {
   const spotify = new Spotify();
   const [response, setResponse] = useState<Artist[] | null>(null);
   const [selection, setSelection] = useState<Artist | null>(null);
+
+  useEffect(() => {
+    if (triedItems) {
+      console.log(triedItems);
+    }
+  }, [triedItems]);
 
   const handleSearch = async (event: ChangeEvent<HTMLInputElement>) => {
     const { value: query } = event.target;

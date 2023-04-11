@@ -36,6 +36,13 @@ export type ChallengePayload = {
   topArtists: string[];
 };
 
+export type BoardTile = {
+  data: Artist | null;
+  id: string;
+  tries: number;
+  success: boolean;
+};
+
 export type LocalStorageToken = {
   dateStamp: string; //ISO String,
   token: string;
