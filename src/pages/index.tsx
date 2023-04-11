@@ -22,7 +22,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Layout>
+      <Layout showTopBar={false}>
         <div className="flex flex-col justify-between text-center h-max">
           <div className="text-6xl py-6">Ditty</div>
           <button
