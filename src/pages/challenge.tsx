@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import Search from "@/components/Search";
 import SocialLinks from "@/components/SocialLinks";
 import { UserContext } from "@/shared/context";
-import { Artist, ChallengePayload } from "@/shared/models";
+import { BoardTile, ChallengePayload } from "@/shared/models";
 import { decodeChallengeToken } from "@/shared/util";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -19,9 +19,27 @@ export async function getServerSideProps({ query }: any) {
   };
 }
 
+const initializeBoardTiles = (
+  challengePayload: ChallengePayload
+): BoardTile[] => {
+  let boardTiles: BoardTile[] = [];
+  for (let i = 0; i < 10; i++) {
+    boardTiles.push({
+      data: null,
+      id: challengePayload.topArtists[i],
+      tries: 0,
+      success: false,
+    });
+  }
+  return boardTiles;
+};
+
 export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   const { user, setUser } = useContext(UserContext);
-  const [matchedItems, setMatchedItems] = useState<any[]>([]);
+  const [triedItems, setTriedItems] = useState<any[]>([]);
+  const [boardTiles, setBoardTiles] = useState<BoardTile[]>(
+    initializeBoardTiles(props.challengePayload)
+  );
   const router = useRouter();
 
   useEffect(() => {
@@ -31,38 +49,70 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   }, [user, router]);
 
   const selectedItem = (item: any) => {
-    if (isTopDittyMatch(item.id) && !isDuplicateMatch(item)) {
-      setMatchedItems((previousMatchedItems) => [
-        ...previousMatchedItems,
-        ...[item],
-      ]);
+    if (addTriedItem(item)) {
+      const matchedIndex = isTopDittyMatch(item.id);
+      if (matchedIndex >= 0) {
+        onSuccessMatch(item, matchedIndex);
+      } else if (matchedIndex < 0) {
+        onFailedMatch();
+      }
     }
   };
 
-  const isTopDittyMatch = (id: string): boolean => {
+  const isTopDittyMatch = (id: string): number => {
     const { topArtists } = props.challengePayload;
-    return (
+    console.log(
       topArtists.findIndex((artist) => {
         return artist === id;
-      }) > 0
+      })
     );
+    return topArtists.findIndex((artist) => {
+      return artist === id;
+    });
   };
 
-  const isDuplicateMatch = (item: Artist) => {
-    return !!matchedItems.find((artist) => {
-      return artist.id === item.id;
+  const addTriedItem = (item: any): boolean => {
+    if (!triedItems.find((attempt) => attempt.id === item.id)) {
+      setTriedItems((previousTriedItems) => [...previousTriedItems, item]);
+      return true;
+    }
+    return false;
+  };
+
+  // Adds the item matched to the corresponding board tile.
+  const onSuccessMatch = (item: any, matchedIndex: number) => {
+    setBoardTiles((previousBoardTiles) => {
+      let newBoardTiles = [...previousBoardTiles];
+      newBoardTiles[matchedIndex] = {
+        ...previousBoardTiles[matchedIndex],
+        data: item,
+        success: true,
+      };
+      return newBoardTiles;
+    });
+  };
+
+  // Adds one try to all tiles that have not been matched.
+  const onFailedMatch = () => {
+    console.log("OnFailedMatch");
+    setBoardTiles((previousBoardTiles) => {
+      return previousBoardTiles.map((boardTile) => {
+        let newBoardTile = { ...boardTile };
+        if (!newBoardTile.success) newBoardTile.tries++;
+        return newBoardTile;
+      });
     });
   };
 
   return (
     <Layout>
-      <h1>{props.challengePayload.challenger}</h1>
       <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
-      {matchedItems.map((item) => {
-        return <div key={item.id}>{item.name}</div>;
-      })}
-      <Search selectedItem={selectedItem} />
-      <Board challengePayload={props.challengePayload} />
+      <Search triedItems={triedItems} selectedItem={selectedItem} />
+      <h1>{props.challengePayload.challenger}</h1>
+      <Board
+        challengePayload={props.challengePayload}
+        boardTiles={boardTiles}
+      />
       <SocialLinks />
     </Layout>
   );
