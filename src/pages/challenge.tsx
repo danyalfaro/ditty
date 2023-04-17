@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import Search from "@/components/Search";
 import SocialLinks from "@/components/SocialLinks";
 import { UserContext } from "@/shared/context";
-import { BoardTile, ChallengePayload } from "@/shared/models";
+import { Artist, BoardTile, ChallengePayload, Track } from "@/shared/models";
 import { decodeChallengeToken } from "@/shared/util";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -26,7 +26,7 @@ const initializeBoardTiles = (
   for (let i = 0; i < 10; i++) {
     boardTiles.push({
       data: null,
-      id: challengePayload.topArtists[i],
+      id: challengePayload.items[i],
       tries: 0,
       success: false,
     });
@@ -34,13 +34,18 @@ const initializeBoardTiles = (
   return boardTiles;
 };
 
-export const Challenge = (props: { challengePayload: ChallengePayload }) => {
+export const Challenge = ({
+  challengePayload,
+}: {
+  challengePayload: ChallengePayload;
+}) => {
   const { user, setUser } = useContext(UserContext);
   const [triedItems, setTriedItems] = useState<any[]>([]);
   const [boardTiles, setBoardTiles] = useState<BoardTile[]>(
-    initializeBoardTiles(props.challengePayload)
+    initializeBoardTiles(challengePayload)
   );
   const router = useRouter();
+  const { challenger, challengeCategory, items } = challengePayload;
 
   useEffect(() => {
     if (!user) {
@@ -48,7 +53,7 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
     }
   }, [user, router]);
 
-  const selectedItem = (item: any) => {
+  const selectedItem = (item: Artist | Track) => {
     if (addTriedItem(item)) {
       const matchedIndex = isTopDittyMatch(item.id);
       if (matchedIndex >= 0) {
@@ -60,14 +65,8 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   };
 
   const isTopDittyMatch = (id: string): number => {
-    const { topArtists } = props.challengePayload;
-    console.log(
-      topArtists.findIndex((artist) => {
-        return artist === id;
-      })
-    );
-    return topArtists.findIndex((artist) => {
-      return artist === id;
+    return items.findIndex((item) => {
+      return item === id;
     });
   };
 
@@ -94,7 +93,6 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
 
   // Adds one try to all tiles that have not been matched.
   const onFailedMatch = () => {
-    console.log("OnFailedMatch");
     setBoardTiles((previousBoardTiles) => {
       return previousBoardTiles.map((boardTile) => {
         let newBoardTile = { ...boardTile };
@@ -107,12 +105,13 @@ export const Challenge = (props: { challengePayload: ChallengePayload }) => {
   return (
     <Layout>
       <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
-      <Search triedItems={triedItems} selectedItem={selectedItem} />
-      <h1>{props.challengePayload.challenger}</h1>
-      <Board
-        challengePayload={props.challengePayload}
-        boardTiles={boardTiles}
+      <Search
+        triedItems={triedItems}
+        selectedItem={selectedItem}
+        challengeCategory={challengeCategory}
       />
+      <h1>{challenger}</h1>
+      <Board challengePayload={challengePayload} boardTiles={boardTiles} />
       <SocialLinks />
     </Layout>
   );

@@ -1,12 +1,16 @@
 import Spotify from "@/services/spotify";
-import { Artist } from "@/shared/models";
+import { Artist, Track } from "@/shared/models";
 import Image from "next/image";
 import { ChangeEvent, useEffect, useState } from "react";
 
-export const Search = ({ selectedItem, triedItems }: any) => {
+export const Search = ({
+  selectedItem,
+  triedItems,
+  challengeCategory,
+}: any) => {
   const spotify = new Spotify();
   const [response, setResponse] = useState<Artist[] | null>(null);
-  const [selection, setSelection] = useState<Artist | null>(null);
+  const [selection, setSelection] = useState<Artist | Track | null>(null);
 
   useEffect(() => {
     if (triedItems) {
@@ -19,16 +23,16 @@ export const Search = ({ selectedItem, triedItems }: any) => {
 
     // TODO: add debounce
     if (query.length > 1) {
-      const res = await spotify.searchArtists(query);
+      const res = await spotify.searchItems(query, challengeCategory);
       setResponse(res);
     } else if (query.length === 0) {
       setResponse(null);
     }
   };
 
-  const handleItemSelection = (artist: Artist) => {
-    setSelection(artist);
-    selectedItem(artist);
+  const handleItemSelection = (item: Artist | Track) => {
+    setSelection(item);
+    selectedItem(item);
   };
 
   return (
@@ -49,7 +53,7 @@ export const Search = ({ selectedItem, triedItems }: any) => {
                   key={item.id}
                   className="flex flex-row items-center p-4 my-4 bg-gray-400 cursor-pointer"
                 >
-                  {item?.images[0]?.url ? (
+                  {item?.images ? (
                     <Image
                       src={`${item.images[0].url}`}
                       alt={`Picture of ${item.name}`}

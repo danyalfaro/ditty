@@ -1,4 +1,12 @@
-import { Artist, LocalStorageToken, User } from "@/shared/models";
+import {
+  Artist,
+  ChallengeCategory,
+  ChallengeTimeRange,
+  CHALLENGE_CATEGORY_SINGULAR_MAP,
+  LocalStorageToken,
+  Track,
+  User,
+} from "@/shared/models";
 import axios, { AxiosError, AxiosInstance } from "axios";
 
 export default class Spotify {
@@ -126,23 +134,10 @@ export default class Spotify {
     return res.data;
   };
 
-  getTopArtists = async (): Promise<Artist[]> => {
-    let accessToken = this.getAccessTokenFromStorage();
-    if (!accessToken) {
-      const redirectURI: string | undefined =
-        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
-      this.getAccessToken(redirectURI);
-      return [];
-    }
-    this.spotifyAPI.interceptors.request.use((config) => {
-      config.headers.Authorization = `${this.tokenType} ${accessToken}`;
-      return config;
-    });
-    const res = await this.spotifyAPI.get(`me/top/artists?offset=0&limit=10`);
-    return res.data.items;
-  };
-
-  searchArtists = async (query: string) => {
+  getTopItems = async (
+    category: ChallengeCategory,
+    timeRange: ChallengeTimeRange
+  ): Promise<Artist[] | Track[]> => {
     let accessToken = this.getAccessTokenFromStorage();
     if (!accessToken) {
       const redirectURI: string | undefined =
@@ -155,8 +150,28 @@ export default class Spotify {
       return config;
     });
     const res = await this.spotifyAPI.get(
-      `https://api.spotify.com/v1/search?type=artist&q=${query}`
+      `me/top/${category}?time_range=${timeRange}&offset=0&limit=10`
     );
-    return res.data.artists.items;
+    return res.data.items;
+  };
+
+  searchItems = async (query: string, category: ChallengeCategory) => {
+    let accessToken = this.getAccessTokenFromStorage();
+    const type = CHALLENGE_CATEGORY_SINGULAR_MAP[category];
+
+    if (!accessToken) {
+      const redirectURI: string | undefined =
+        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+      this.getAccessToken(redirectURI);
+      return [];
+    }
+    this.spotifyAPI.interceptors.request.use((config) => {
+      config.headers.Authorization = `${this.tokenType} ${accessToken}`;
+      return config;
+    });
+    const res = await this.spotifyAPI.get(
+      `https://api.spotify.com/v1/search?type=${type}&q=${query}`
+    );
+    return res.data[category].items;
   };
 }
