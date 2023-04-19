@@ -14,6 +14,10 @@ export default function Home() {
     spotify.login(redirectURI);
   };
 
+  const onHowToPlay = () => {
+    console.log("How to play...");
+  };
+
   return (
     <>
       <Head>
@@ -23,13 +27,20 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout showTopBar={false}>
-        <div className="flex flex-col justify-between text-center h-max">
-          <div className="text-6xl py-6">Ditty</div>
+        <div className="text-6xl py-6 w-full text-center">Ditty</div>
+        <div className="w-full">
           <button
-            className="bg-green-600 text-slate-100 p-4 border-solid rounded-md"
+            type="button"
             onClick={onSpotifyLogin}
+            className="bg-green-600 text-slate-100 p-4 border-solid rounded-md w-full"
           >
-            Create Game
+            Start Game
+          </button>
+          <button
+            className="text-slate-500 p-4 border-solid rounded-md w-full"
+            onClick={onHowToPlay}
+          >
+            How to Play
           </button>
         </div>
       </Layout>
