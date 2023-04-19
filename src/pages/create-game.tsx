@@ -1,5 +1,10 @@
 import Spotify from "@/services/spotify";
-import { ChallengePayload, TopArtistResponse } from "@/shared/models";
+import {
+  ChallengeCategory,
+  ChallengePayload,
+  ChallengeTimeRange,
+  TopItemsResponse,
+} from "@/shared/models";
 import { useContext, useEffect, useState } from "react";
 import { encodeChallengeToken } from "@/shared/util";
 import { useRouter } from "next/router";
@@ -25,6 +30,11 @@ export async function getServerSideProps({ query }: any) {
 export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
   const [challengePayload, setChallengePayload] =
     useState<ChallengePayload | null>(null);
+  const [challengeCategory, setChallengeCategory] = useState<ChallengeCategory>(
+    ChallengeCategory.ARTISTS
+  );
+  const [challengeTimeRange, setChallengeTimeRange] =
+    useState<ChallengeTimeRange>(ChallengeTimeRange.RECENT);
   const spotify = new Spotify();
   const router = useRouter();
   const { user: activeUser, setUser } = useContext(UserContext);
@@ -47,21 +57,25 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
   };
 
   const spotifyResponseToChallengePayload = (
-    response: TopArtistResponse
+    response: TopItemsResponse
   ): ChallengePayload => {
     const challengePayload: ChallengePayload = {
       challenger: `${user.display_name}`,
-      topArtists: response.map((artist) => artist.id),
+      challengeCategory: challengeCategory,
+      items: response.map((item) => item.id),
     };
     return challengePayload;
   };
 
-  const getTopArtists = async (): Promise<{
+  const getTopItems = async (): Promise<{
     challengePayload: ChallengePayload;
     challengeToken: string;
   }> => {
-    const topArtists = await spotify.getTopArtists();
-    const challengePayload = spotifyResponseToChallengePayload(topArtists);
+    const topItems = await spotify.getTopItems(
+      challengeCategory,
+      challengeTimeRange
+    );
+    const challengePayload = spotifyResponseToChallengePayload(topItems);
     const challengeToken = encodeChallengeToken(challengePayload);
     return {
       challengePayload,
@@ -69,8 +83,8 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
     };
   };
 
-  const onTopArtistsSelection = async () => {
-    const { challengePayload, challengeToken } = await getTopArtists();
+  const onStartGame = async () => {
+    const { challengePayload, challengeToken } = await getTopItems();
     setChallengePayload(challengePayload);
     router.push(
       `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`
@@ -81,13 +95,67 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
     <Layout>
       <div>Can anyone guess your Top Ditty? Share Your Link To Find Out...</div>
       <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
+      <div className="w-full">
+        <label className="w-full text-left">Category</label>
+        <div className="inline-flex w-full" id="categoryButtonGroup">
+          <button
+            onClick={() => setChallengeCategory(ChallengeCategory.SONGS)}
+            className={
+              "font-bold py-2 px-4 rounded-l w-1/2 transition-colors duration-500 " +
+              (challengeCategory === ChallengeCategory.SONGS
+                ? "bg-black text-gray-300"
+                : "bg-gray-300 text-gray-800")
+            }
+          >
+            Songs
+          </button>
+          <button
+            onClick={() => setChallengeCategory(ChallengeCategory.ARTISTS)}
+            className={
+              " font-bold py-2 px-4 rounded-r w-1/2 transition-colors duration-500 " +
+              (challengeCategory === ChallengeCategory.ARTISTS
+                ? "bg-black text-gray-300"
+                : "bg-gray-300 text-gray-800")
+            }
+          >
+            Artists
+          </button>
+        </div>
+      </div>
+      <div className="w-full">
+        <label className="w-full text-left">Time Range</label>
+        <div className="inline-flex w-full">
+          <button
+            onClick={() => setChallengeTimeRange(ChallengeTimeRange.RECENT)}
+            className={
+              "font-bold py-2 px-4 rounded-l w-1/2 transition-colors duration-500 " +
+              (challengeTimeRange === ChallengeTimeRange.RECENT
+                ? "bg-black text-gray-300"
+                : "bg-gray-300 text-gray-800")
+            }
+          >
+            Recent
+          </button>
+          <button
+            onClick={() => setChallengeTimeRange(ChallengeTimeRange.ALL_TIME)}
+            className={
+              "font-bold py-2 px-4 rounded-r w-1/2 transition-colors duration-500 " +
+              (challengeTimeRange === ChallengeTimeRange.ALL_TIME
+                ? "bg-black text-gray-300"
+                : "bg-gray-300 text-gray-800")
+            }
+          >
+            All Time
+          </button>
+        </div>
+      </div>
 
       <button
         type="button"
-        onClick={onTopArtistsSelection}
-        className="bg-green-600 text-slate-100 p-4 border-solid rounded-md"
+        onClick={onStartGame}
+        className="bg-green-600 text-slate-100 p-4 border-solid rounded-md w-full"
       >
-        My top Artists
+        Start Game
       </button>
     </Layout>
   );

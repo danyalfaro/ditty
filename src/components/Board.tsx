@@ -1,9 +1,6 @@
 import { BoardTile } from "@/shared/models";
-import { useEffect } from "react";
 
 export const Board = ({ boardTiles }: any) => {
-  useEffect(() => {}, [boardTiles]);
-
   return (
     <>
       {boardTiles.map((boardTile: BoardTile, i: number) => {
