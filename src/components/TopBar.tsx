@@ -1,14 +1,23 @@
-import { FaUser } from "react-icons/fa";
+import { UserContext } from "@/shared/context";
+import { useContext, useEffect } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 
 export default function TopBar() {
+  const { user, setUser } = useContext(UserContext);
+
   return (
     <>
-      <div className="flex justify-center items-center w-full">
+      <div className="flex justify-center items-center w-full bg-">
         <div className="flex justify-between items-center h-full w-full px-8 py-4">
           <GiHamburgerMenu size={"24px"} />
           <h1 className="text-4xl">DITTY</h1>
-          <FaUser size={"24px"} />
+          {user && (
+            <div className="bg-gray-400 text-slate-50 w-12 h-12 flex justify-center items-center rounded-full">
+              <span className="text-2xl">
+                {user.display_name[0].toLocaleUpperCase("en-US")}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </>

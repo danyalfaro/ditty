@@ -109,3 +109,9 @@ a {
     color-scheme: dark;
   }
 }
+
+button:disabled{
+  opacity: 33%;
+  background-color: #ccc;
+  pointer-events: none;
+}

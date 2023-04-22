@@ -53,15 +53,17 @@ export const Challenge = ({
     }
   }, [user, router]);
 
-  const selectedItem = (item: Artist | Track) => {
+  const selectedItem = (item: Artist | Track): boolean => {
     if (addTriedItem(item)) {
       const matchedIndex = isTopDittyMatch(item.id);
       if (matchedIndex >= 0) {
         onSuccessMatch(item, matchedIndex);
+        return true;
       } else if (matchedIndex < 0) {
         onFailedMatch();
       }
     }
+    return false;
   };
 
   const isTopDittyMatch = (id: string): number => {
@@ -104,7 +106,6 @@ export const Challenge = ({
 
   return (
     <Layout>
-      <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
       <Search
         triedItems={triedItems}
         selectedItem={selectedItem}

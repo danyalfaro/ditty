@@ -32,7 +32,11 @@ export const Search = ({
 
   const handleItemSelection = (item: Artist | Track) => {
     setSelection(item);
-    selectedItem(item);
+    console.log(selectedItem(item));
+  };
+
+  const isDuplicate = (item: any): boolean => {
+    return triedItems.find((attempt: any) => attempt.id === item.id);
   };
 
   return (
@@ -48,12 +52,13 @@ export const Search = ({
           {response &&
             response?.map((item) => {
               return (
-                <div
+                <button
+                  disabled={isDuplicate(item)}
                   onClick={() => handleItemSelection(item)}
                   key={item.id}
-                  className="flex flex-row items-center p-4 my-4 bg-gray-400 cursor-pointer"
+                  className="w-full h-24 flex flex-row items-center p-4 my-4 bg-gray-400 cursor-pointer"
                 >
-                  {item?.images ? (
+                  {item?.images && item?.images[0]?.url ? (
                     <Image
                       src={`${item.images[0].url}`}
                       alt={`Picture of ${item.name}`}
@@ -64,7 +69,7 @@ export const Search = ({
                     ""
                   )}
                   <div className="px-4">{item.name}</div>
-                </div>
+                </button>
               );
             })}
         </div>

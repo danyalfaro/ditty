@@ -94,7 +94,6 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
   return (
     <Layout>
       <div>Can anyone guess your Top Ditty? Share Your Link To Find Out...</div>
-      <div className="text-2xl py-6">{`Hello ${user?.display_name}`}</div>
       <div className="w-full">
         <label className="w-full text-left">Category</label>
         <div className="inline-flex w-full" id="categoryButtonGroup">
