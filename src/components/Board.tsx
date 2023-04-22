@@ -5,7 +5,7 @@ export const Board = ({ boardTiles }: any) => {
     <>
       {boardTiles.map((boardTile: BoardTile, i: number) => {
         return (
-          <div key={i} className="p-4">
+          <div tabIndex={0} key={i} className="p-4">
             <div>{boardTile.success.toString()}</div>
             <div>{boardTile.data?.name}</div>
             <div>{boardTile.tries}</div>

@@ -111,7 +111,20 @@ export const Challenge = ({
         selectedItem={selectedItem}
         challengeCategory={challengeCategory}
       />
-      <h1>{challenger}</h1>
+      <div tabIndex={0} className="w-full flex justify-between px-4 py-8">
+        <h1>
+          <span className="font-bold">Challenge sent by: </span>
+          <span>{challenger}</span>
+        </h1>
+        <h1>
+          <span className="font-bold">Category: </span>
+          <span>
+            {challengeCategory.charAt(0).toUpperCase() +
+              challengeCategory.slice(1)}
+          </span>
+        </h1>
+      </div>
+
       <Board challengePayload={challengePayload} boardTiles={boardTiles} />
       <SocialLinks />
     </Layout>
