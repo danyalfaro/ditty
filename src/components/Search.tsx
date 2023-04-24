@@ -40,41 +40,39 @@ export const Search = ({
   };
 
   return (
-    <>
-      <div className="flex flex-col w-full">
-        <input
-          type="text"
-          className="searchInput p-4"
-          placeholder="search..."
-          onChange={(e) => handleSearch(e)}
-        />
-        <div>
-          {response &&
-            response?.map((item) => {
-              return (
-                <button
-                  disabled={isDuplicate(item)}
-                  onClick={() => handleItemSelection(item)}
-                  key={item.id}
-                  className="w-full h-24 flex flex-row items-center p-4 my-4 bg-gray-400 cursor-pointer"
-                >
-                  {item?.images && item?.images[0]?.url ? (
-                    <Image
-                      src={`${item.images[0].url}`}
-                      alt={`Picture of ${item.name}`}
-                      width={50}
-                      height={50}
-                    />
-                  ) : (
-                    ""
-                  )}
-                  <div className="px-4">{item.name}</div>
-                </button>
-              );
-            })}
-        </div>
+    <div className="w-full max-w-main relative flex flex-col">
+      <input
+        type="text"
+        className="searchInput p-4"
+        placeholder="search..."
+        onChange={(e) => handleSearch(e)}
+      />
+      <div className="max-w-main w-full max-h-[75vh] absolute mt-16 flex flex-col body overflow-y-scroll">
+        {response &&
+          response?.map((item) => {
+            return (
+              <button
+                disabled={isDuplicate(item)}
+                onClick={() => handleItemSelection(item)}
+                key={item.id}
+                className="w-full h-24 min-h-[6rem] flex flex-row items-center p-4 my-1 bg-gray-400 cursor-pointer"
+              >
+                {item?.images && item?.images[0]?.url ? (
+                  <Image
+                    src={`${item.images[0].url}`}
+                    alt={`Picture of ${item.name}`}
+                    width={50}
+                    height={50}
+                  />
+                ) : (
+                  ""
+                )}
+                <div className="px-4">{item.name}</div>
+              </button>
+            );
+          })}
       </div>
-    </>
+    </div>
   );
 };
 

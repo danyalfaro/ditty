@@ -111,7 +111,7 @@ export const Challenge = ({
         selectedItem={selectedItem}
         challengeCategory={challengeCategory}
       />
-      <div tabIndex={0} className="w-full flex justify-between px-4 py-8">
+      <div tabIndex={0} className="w-full flex justify-between py-8">
         <h1>
           <span className="font-bold">Challenge sent by: </span>
           <span>{challenger}</span>

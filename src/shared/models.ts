@@ -1,7 +1,3 @@
-export type Data = {
-  name: string;
-};
-
 enum ResponseObjectType {
   ARTIST = "artist",
   SONG = "song",
@@ -99,7 +95,7 @@ export enum ChallengeTimeRange {
 }
 
 export type BoardTile = {
-  data: Artist | null;
+  data: Artist | Track | null;
   id: string;
   tries: number;
   success: boolean;
