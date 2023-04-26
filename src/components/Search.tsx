@@ -1,64 +1,40 @@
-import Spotify from "@/services/spotify";
-import { Artist, Track } from "@/shared/models";
+// import Spotify from "@/services/spotify";
+import { ItemWrapper } from "@/shared/models";
 import Image from "next/image";
-import { ChangeEvent, useEffect, useState } from "react";
 
 export const Search = ({
-  selectedItem,
-  triedItems,
-  challengeCategory,
+  searchOptions,
+  handleSearch,
+  onItemSelection,
 }: any) => {
-  const spotify = new Spotify();
-  const [response, setResponse] = useState<Artist[] | null>(null);
-  const [selection, setSelection] = useState<Artist | Track | null>(null);
-
-  useEffect(() => {
-    if (triedItems) {
-      console.log(triedItems);
-    }
-  }, [triedItems]);
-
-  const handleSearch = async (event: ChangeEvent<HTMLInputElement>) => {
-    const { value: query } = event.target;
-
-    // TODO: add debounce
-    if (query.length > 1) {
-      const res = await spotify.searchItems(query, challengeCategory);
-      setResponse(res);
-    } else if (query.length === 0) {
-      setResponse(null);
-    }
-  };
-
-  const handleItemSelection = (item: Artist | Track) => {
-    setSelection(item);
-    console.log(selectedItem(item));
-  };
-
-  const isDuplicate = (item: any): boolean => {
-    return triedItems.find((attempt: any) => attempt.id === item.id);
-  };
-
   return (
-    <>
-      <div className="flex flex-col w-full">
-        <input
-          type="text"
-          className="searchInput p-4"
-          placeholder="search..."
-          onChange={(e) => handleSearch(e)}
-        />
-        <div>
-          {response &&
-            response?.map((item) => {
+    <div className="w-full max-w-main relative flex flex-col">
+      <input
+        type="text"
+        className="searchInput p-4"
+        placeholder="search..."
+        onChange={(e) => handleSearch(e)}
+      />
+      <div className="max-w-main w-full max-h-[75vh] absolute mt-16 flex flex-col body overflow-y-scroll">
+        {searchOptions &&
+          searchOptions?.map(
+            ({
+              data: item,
+              hasBeenAttempted,
+              isSuccess,
+              rank,
+            }: ItemWrapper) => {
               return (
                 <button
-                  disabled={isDuplicate(item)}
-                  onClick={() => handleItemSelection(item)}
+                  disabled={!!hasBeenAttempted}
+                  onClick={() => onItemSelection(item)}
                   key={item.id}
-                  className="w-full h-24 flex flex-row items-center p-4 my-4 bg-gray-400 cursor-pointer"
+                  className={
+                    "w-full h-24 min-h-[6rem] flex flex-row items-center p-4 my-1 cursor-pointer " +
+                    (isSuccess ? "text-gray-200 bg-green-900" : "bg-gray-400")
+                  }
                 >
-                  {item?.images && item?.images[0]?.url ? (
+                  {"images" in item && item?.images[0]?.url ? (
                     <Image
                       src={`${item.images[0].url}`}
                       alt={`Picture of ${item.name}`}
@@ -69,12 +45,13 @@ export const Search = ({
                     ""
                   )}
                   <div className="px-4">{item.name}</div>
+                  {isSuccess && <div className="px-4">{rank + 1}</div>}
                 </button>
               );
-            })}
-        </div>
+            }
+          )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -2,11 +2,19 @@ import Board from "@/components/Board";
 import Layout from "@/components/Layout";
 import Search from "@/components/Search";
 import SocialLinks from "@/components/SocialLinks";
+import Spotify from "@/services/spotify";
 import { UserContext } from "@/shared/context";
-import { Artist, BoardTile, ChallengePayload, Track } from "@/shared/models";
+import {
+  Artist,
+  BoardTile,
+  ChallengeCategory,
+  ChallengePayload,
+  ItemWrapper,
+  Track,
+} from "@/shared/models";
 import { decodeChallengeToken } from "@/shared/util";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useContext } from "react";
 
 export async function getServerSideProps({ query }: any) {
@@ -40,11 +48,13 @@ export const Challenge = ({
   challengePayload: ChallengePayload;
 }) => {
   const { user, setUser } = useContext(UserContext);
-  const [triedItems, setTriedItems] = useState<any[]>([]);
+  const [searchOptions, setSearchOptions] = useState<ItemWrapper[]>([]);
+  const [attemptedItems, setAttemptedItems] = useState<ItemWrapper[]>([]);
   const [boardTiles, setBoardTiles] = useState<BoardTile[]>(
     initializeBoardTiles(challengePayload)
   );
   const router = useRouter();
+  const spotify = new Spotify();
   const { challenger, challengeCategory, items } = challengePayload;
 
   useEffect(() => {
@@ -53,14 +63,47 @@ export const Challenge = ({
     }
   }, [user, router]);
 
-  const selectedItem = (item: Artist | Track): boolean => {
-    if (addTriedItem(item)) {
-      const matchedIndex = isTopDittyMatch(item.id);
-      if (matchedIndex >= 0) {
-        onSuccessMatch(item, matchedIndex);
+  const findAttemptByItem = (item: any): ItemWrapper | undefined => {
+    return attemptedItems.find(
+      (attempt: ItemWrapper) => attempt.data.id === item.id
+    );
+  };
+
+  const handleSearch = async (event: ChangeEvent<HTMLInputElement>) => {
+    const { value: query } = event.target;
+
+    // TODO: add debounce
+    if (query.length > 1) {
+      const res = await spotify.searchItems(query, challengeCategory);
+      setSearchOptions(
+        res.map((item: any): ItemWrapper => {
+          const attemptByItem = findAttemptByItem(item);
+          if (attemptByItem === undefined) {
+            return {
+              type: challengeCategory,
+              data: item,
+              hasBeenAttempted: false,
+              isSuccess: false,
+              rank: -1,
+            };
+          }
+          return attemptByItem;
+        })
+      );
+    } else if (query.length === 0) {
+      setSearchOptions([]);
+    }
+  };
+
+  //TODO set ItemWrapper properties for isDuplicate, success, tries...
+  const onItemSelection = (item: Artist | Track): boolean => {
+    if (addAttempt(item)) {
+      const matchedTileIndex = isTopDittyMatch(item.id);
+      if (matchedTileIndex >= 0) {
+        onSuccessMatch(item, matchedTileIndex);
         return true;
-      } else if (matchedIndex < 0) {
-        onFailedMatch();
+      } else if (matchedTileIndex < 0) {
+        onFailedMatch(item);
       }
     }
     return false;
@@ -72,20 +115,44 @@ export const Challenge = ({
     });
   };
 
-  const addTriedItem = (item: any): boolean => {
-    if (!triedItems.find((attempt) => attempt.id === item.id)) {
-      setTriedItems((previousTriedItems) => [...previousTriedItems, item]);
+  const addAttempt = (item: Artist | Track): boolean => {
+    if (!attemptedItems.find((attempt) => attempt.data.id === item.id)) {
+      const rank = isTopDittyMatch(item.id);
+      setAttemptedItems((previousAttemptedItems) => [
+        ...previousAttemptedItems,
+        {
+          data: item,
+          isSuccess: rank >= 0,
+          rank: rank,
+          type: ChallengeCategory.ARTISTS,
+          hasBeenAttempted: true,
+        },
+      ]);
       return true;
     }
     return false;
   };
 
   // Adds the item matched to the corresponding board tile.
-  const onSuccessMatch = (item: any, matchedIndex: number) => {
+  const onSuccessMatch = (item: Artist | Track, matchedTileIndex: number) => {
+    setSearchOptions((previousItemWrappers) => {
+      let newItemWrappers = [...previousItemWrappers];
+      const searchOptionToUpdate = newItemWrappers.findIndex(
+        (attempt: ItemWrapper) => attempt?.data?.id === item.id
+      );
+      const updatedItem: ItemWrapper = {
+        ...newItemWrappers[searchOptionToUpdate],
+        isSuccess: true,
+        hasBeenAttempted: true,
+        rank: matchedTileIndex,
+      };
+      newItemWrappers[searchOptionToUpdate] = updatedItem;
+      return newItemWrappers;
+    });
     setBoardTiles((previousBoardTiles) => {
       let newBoardTiles = [...previousBoardTiles];
-      newBoardTiles[matchedIndex] = {
-        ...previousBoardTiles[matchedIndex],
+      newBoardTiles[matchedTileIndex] = {
+        ...previousBoardTiles[matchedTileIndex],
         data: item,
         success: true,
       };
@@ -94,7 +161,20 @@ export const Challenge = ({
   };
 
   // Adds one try to all tiles that have not been matched.
-  const onFailedMatch = () => {
+  const onFailedMatch = (item: Artist | Track) => {
+    setSearchOptions((previousItemWrappers) => {
+      let newItemWrappers = [...previousItemWrappers];
+      const searchOptionToUpdate = newItemWrappers.findIndex(
+        (attempt: ItemWrapper) => attempt?.data?.id === item.id
+      );
+      const updatedItem: ItemWrapper = {
+        ...newItemWrappers[searchOptionToUpdate],
+        isSuccess: false,
+        hasBeenAttempted: true,
+      };
+      newItemWrappers[searchOptionToUpdate] = updatedItem;
+      return newItemWrappers;
+    });
     setBoardTiles((previousBoardTiles) => {
       return previousBoardTiles.map((boardTile) => {
         let newBoardTile = { ...boardTile };
@@ -107,11 +187,11 @@ export const Challenge = ({
   return (
     <Layout>
       <Search
-        triedItems={triedItems}
-        selectedItem={selectedItem}
-        challengeCategory={challengeCategory}
+        handleSearch={handleSearch}
+        searchOptions={searchOptions}
+        onItemSelection={onItemSelection}
       />
-      <div tabIndex={0} className="w-full flex justify-between px-4 py-8">
+      <div tabIndex={0} className="w-full flex justify-between py-8">
         <h1>
           <span className="font-bold">Challenge sent by: </span>
           <span>{challenger}</span>
@@ -125,7 +205,7 @@ export const Challenge = ({
         </h1>
       </div>
 
-      <Board challengePayload={challengePayload} boardTiles={boardTiles} />
+      <Board boardTiles={boardTiles} />
       <SocialLinks />
     </Layout>
   );

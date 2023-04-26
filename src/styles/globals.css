@@ -89,7 +89,7 @@ body {
   overflow-x: hidden;
 }
 
-body {
+.body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
       to bottom,
@@ -112,6 +112,5 @@ a {
 
 button:disabled{
   opacity: 33%;
-  background-color: #ccc;
   pointer-events: none;
 }

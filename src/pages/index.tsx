@@ -27,7 +27,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout showTopBar={false}>
-        <div className="text-6xl py-6 w-full text-center">Ditty</div>
+        <div className="text-6xl py-6 w-full text-center">DITTY</div>
         <div className="w-full">
           <button
             type="button"
