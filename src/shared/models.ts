@@ -94,6 +94,14 @@ export enum ChallengeTimeRange {
   ALL_TIME = "long_term",
 }
 
+export type ItemWrapper = {
+  type: ChallengeCategory;
+  data: Artist | Track;
+  hasBeenAttempted: boolean;
+  isSuccess: boolean;
+  rank: number;
+};
+
 export type BoardTile = {
   data: Artist | Track | null;
   id: string;

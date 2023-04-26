@@ -112,6 +112,5 @@ a {
 
 button:disabled{
   opacity: 33%;
-  background-color: #ccc;
   pointer-events: none;
 }

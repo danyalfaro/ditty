@@ -111,7 +111,7 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
           <button
             onClick={() => setChallengeCategory(ChallengeCategory.ARTISTS)}
             className={
-              " font-bold py-2 px-4 rounded-r w-1/2 transition-colors duration-500 " +
+              "font-bold py-2 px-4 rounded-r w-1/2 transition-colors duration-500 " +
               (challengeCategory === ChallengeCategory.ARTISTS
                 ? "bg-black text-gray-300"
                 : "bg-gray-300 text-gray-800")
