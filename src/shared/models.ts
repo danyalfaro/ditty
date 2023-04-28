@@ -107,6 +107,7 @@ export type BoardTile = {
   id: string;
   tries: number;
   success: boolean;
+  rank: number;
 };
 
 export type LocalStorageToken = {

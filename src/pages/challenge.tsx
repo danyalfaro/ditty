@@ -37,6 +37,7 @@ const initializeBoardTiles = (
       id: challengePayload.items[i],
       tries: 0,
       success: false,
+      rank: i + 1,
     });
   }
   return boardTiles;
@@ -136,18 +137,19 @@ export const Challenge = ({
   // Adds the item matched to the corresponding board tile.
   const onSuccessMatch = (item: Artist | Track, matchedTileIndex: number) => {
     setSearchOptions((previousItemWrappers) => {
-      let newItemWrappers = [...previousItemWrappers];
-      const searchOptionToUpdate = newItemWrappers.findIndex(
-        (attempt: ItemWrapper) => attempt?.data?.id === item.id
-      );
-      const updatedItem: ItemWrapper = {
-        ...newItemWrappers[searchOptionToUpdate],
-        isSuccess: true,
-        hasBeenAttempted: true,
-        rank: matchedTileIndex,
-      };
-      newItemWrappers[searchOptionToUpdate] = updatedItem;
-      return newItemWrappers;
+      // let newItemWrappers = [...previousItemWrappers];
+      // const searchOptionToUpdate = newItemWrappers.findIndex(
+      //   (attempt: ItemWrapper) => attempt?.data?.id === item.id
+      // );
+      // const updatedItem: ItemWrapper = {
+      //   ...newItemWrappers[searchOptionToUpdate],
+      //   isSuccess: true,
+      //   hasBeenAttempted: true,
+      //   rank: matchedTileIndex,
+      // };
+      // newItemWrappers[searchOptionToUpdate] = updatedItem;
+      // return newItemWrappers;
+      return [];
     });
     setBoardTiles((previousBoardTiles) => {
       let newBoardTiles = [...previousBoardTiles];

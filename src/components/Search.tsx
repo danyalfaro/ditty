@@ -30,7 +30,7 @@ export const Search = ({
                   onClick={() => onItemSelection(item)}
                   key={item.id}
                   className={
-                    "w-full h-24 min-h-[6rem] flex flex-row items-center p-4 my-1 cursor-pointer " +
+                    "w-full h-24 min-h-[6rem] flex flex-row items-center p-4 my-1 transition ease-in-out duration-250 cursor-pointer " +
                     (isSuccess ? "text-gray-200 bg-green-900" : "bg-gray-400")
                   }
                 >
