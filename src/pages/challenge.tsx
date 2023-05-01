@@ -60,7 +60,7 @@ export const Challenge = ({
 
   useEffect(() => {
     if (!user) {
-      router.push(`${process.env.NEXT_PUBLIC_DITTY_URL}`);
+      // router.push(`${process.env.NEXT_PUBLIC_DITTY_URL}`);
     }
   }, [user, router]);
 
@@ -136,21 +136,7 @@ export const Challenge = ({
 
   // Adds the item matched to the corresponding board tile.
   const onSuccessMatch = (item: Artist | Track, matchedTileIndex: number) => {
-    setSearchOptions((previousItemWrappers) => {
-      // let newItemWrappers = [...previousItemWrappers];
-      // const searchOptionToUpdate = newItemWrappers.findIndex(
-      //   (attempt: ItemWrapper) => attempt?.data?.id === item.id
-      // );
-      // const updatedItem: ItemWrapper = {
-      //   ...newItemWrappers[searchOptionToUpdate],
-      //   isSuccess: true,
-      //   hasBeenAttempted: true,
-      //   rank: matchedTileIndex,
-      // };
-      // newItemWrappers[searchOptionToUpdate] = updatedItem;
-      // return newItemWrappers;
-      return [];
-    });
+    setSearchOptions([]);
     setBoardTiles((previousBoardTiles) => {
       let newBoardTiles = [...previousBoardTiles];
       newBoardTiles[matchedTileIndex] = {
@@ -208,7 +194,8 @@ export const Challenge = ({
       </div>
 
       <Board boardTiles={boardTiles} />
-      <SocialLinks />
+      {/* <SocialLinks /> */}
+      <div>Counter: {attemptedItems.length}</div>
     </Layout>
   );
 };

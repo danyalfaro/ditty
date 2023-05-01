@@ -15,7 +15,7 @@ export const Search = ({
         placeholder="search..."
         onChange={(e) => handleSearch(e)}
       />
-      <div className="max-w-main w-full max-h-[75vh] absolute mt-16 flex flex-col body overflow-y-scroll">
+      <div className="max-w-main w-full max-h-[75vh] absolute mt-16 flex flex-col body overflow-y-scroll z-10">
         {searchOptions &&
           searchOptions?.map(
             ({

@@ -1,6 +1,7 @@
 import { BoardTile } from "@/shared/models";
 import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 import ReactCanvasConfetti from "react-canvas-confetti";
+import Tile from "./Tile";
 
 export const Board = ({ boardTiles }: { boardTiles: BoardTile[] }) => {
   const [previousTiles, setPreviousTiles] = useState<BoardTile[]>([]);
@@ -23,10 +24,6 @@ export const Board = ({ boardTiles }: { boardTiles: BoardTile[] }) => {
   const checkTilesForChanges = () => {
     const modifiedTiles = getModifiedTiles();
     if (modifiedTiles.length > 0) {
-      console.log(
-        "ANIMATE: ",
-        modifiedTiles.map((tile) => tile.rank)
-      );
       setFireConfetti(fireConfetti + 1);
       setAnimate(modifiedTiles.map((tile) => tile.rank));
     }
@@ -54,25 +51,68 @@ export const Board = ({ boardTiles }: { boardTiles: BoardTile[] }) => {
         refConfetti={getInstance}
         style={canvasStyles}
       />
-      {boardTiles.map((boardTile: BoardTile, i: number) => {
-        return (
-          <div
-            tabIndex={0}
-            key={i}
-            className={
-              "w-full text-center " +
-              (animate?.find((rank) => {
-                return rank - 1 === i;
-              })
-                ? "bg-green-400 transition ease-in-out duration-1000"
-                : "")
-            }
-          >
-            <div>{boardTile.data?.name}</div>
-            {!boardTile.success && <div>{boardTile.tries}</div>}
-          </div>
-        );
-      })}
+      <div className="flex flex-col basis-full w-full justify-between">
+        <div className="flex flex-row justify-center">
+          {boardTiles.slice(0, 3).map((boardTile: BoardTile, i: number) => {
+            return (
+              <div key={i}>
+                <Tile
+                  boardTile={boardTile}
+                  animate={animate?.find((rank) => {
+                    return rank - 1 === i;
+                  })}
+                  rank={i + 1}
+                />
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex flex-row justify-center">
+          {boardTiles.slice(3, 6).map((boardTile: BoardTile, i: number) => {
+            return (
+              <div key={i}>
+                <Tile
+                  boardTile={boardTile}
+                  animate={animate?.find((rank) => {
+                    return rank - 1 === i;
+                  })}
+                  rank={i + 1}
+                />
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex flex-row justify-center">
+          {boardTiles.slice(6, 9).map((boardTile: BoardTile, i: number) => {
+            return (
+              <div key={i}>
+                <Tile
+                  boardTile={boardTile}
+                  animate={animate?.find((rank) => {
+                    return rank - 1 === i;
+                  })}
+                  rank={i + 1}
+                />
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex flex-row justify-center">
+          {boardTiles.slice(9).map((boardTile: BoardTile, i: number) => {
+            return (
+              <div key={i}>
+                <Tile
+                  boardTile={boardTile}
+                  animate={animate?.find((rank) => {
+                    return rank - 1 === i;
+                  })}
+                  rank={i + 1}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </>
   );
 };
