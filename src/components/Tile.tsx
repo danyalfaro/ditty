@@ -29,10 +29,11 @@ export default function Tile({
       <div
         tabIndex={0}
         className={
-          "w-32 h-32 flex items-center justify-center rounded-full relative overflow-clip motion-safe:animate-pulse " +
+          "w-32 h-32 flex items-center justify-center rounded-full relative overflow-clip " +
           (animate
             ? "bg-green-400 transition ease-in-out duration-1000 "
-            : getTileStyleByTries(boardTile.tries))
+            : getTileStyleByTries(boardTile.tries)) +
+          (boardTile?.data ? "" : "motion-safe:animate-pulse")
         }
       >
         {boardTile?.data &&
@@ -47,10 +48,9 @@ export default function Tile({
         ) : (
           ""
         )}
-        <div className="absolute w-full h-full bg-gradient-to-t from-slate-300 to-transparent flex justify-center items-end text-slate-50 pb-4">
+        <div className="absolute w-full h-full bg-gradient-to-t from-slate-500 to-transparent flex justify-center items-end text-slate-50 pb-4">
           {boardTile.data?.name}
         </div>
-        {/* {!boardTile.success && <div>{boardTile.tries}</div>} */}
       </div>
     </>
   );
