@@ -4,11 +4,9 @@ import Image from "next/image";
 export default function Tile({
   boardTile,
   animate,
-  rank,
 }: {
   boardTile: BoardTile;
   animate: any;
-  rank: number;
 }) {
   const getTileStyleByTries = (attempts: number): string => {
     if (attempts >= 30) {
@@ -31,9 +29,9 @@ export default function Tile({
       <div
         tabIndex={0}
         className={
-          "w-32 h-32 flex items-center justify-center rounded-full relative " +
+          "w-32 h-32 flex items-center justify-center rounded-full relative overflow-clip motion-safe:animate-pulse " +
           (animate
-            ? "bg-green-400 transition ease-in-out duration-1000 overflow-clip"
+            ? "bg-green-400 transition ease-in-out duration-1000 "
             : getTileStyleByTries(boardTile.tries))
         }
       >
@@ -49,7 +47,9 @@ export default function Tile({
         ) : (
           ""
         )}
-        <div className="absolute">{boardTile.data?.name}</div>
+        <div className="absolute w-full h-full bg-gradient-to-t from-slate-300 to-transparent flex justify-center items-end text-slate-50 pb-4">
+          {boardTile.data?.name}
+        </div>
         {/* {!boardTile.success && <div>{boardTile.tries}</div>} */}
       </div>
     </>

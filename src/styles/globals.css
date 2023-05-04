@@ -38,6 +38,9 @@
     #00000080
   );
 
+  --linear-glow: linear-gradient(to top left, #b3b3b3, #64e4e6, #6480e6, #b3b3b3);
+  /* --linear-glow: linear-gradient(90deg, #ee6352, purple, #1f678d); */
+
   --callout-rgb: 238, 240, 241;
   --callout-border-rgb: 172, 175, 176;
   --card-rgb: 180, 185, 188;
@@ -75,6 +78,21 @@
     --card-rgb: 100, 100, 100;
     --card-border-rgb: 200, 200, 200;
   }
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: left;
+  }
+  100% {
+    background-position: right;
+  }
+}
+
+#board{
+  background-image: var(--linear-glow);
+  background-size: 500%;
+  animation: gradient-animation 5s infinite alternate;
 }
 
 * {

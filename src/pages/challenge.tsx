@@ -1,7 +1,6 @@
 import Board from "@/components/Board";
 import Layout from "@/components/Layout";
 import Search from "@/components/Search";
-import SocialLinks from "@/components/SocialLinks";
 import Spotify from "@/services/spotify";
 import { UserContext } from "@/shared/context";
 import {
@@ -195,7 +194,7 @@ export const Challenge = ({
 
       <Board boardTiles={boardTiles} />
       {/* <SocialLinks /> */}
-      <div>Counter: {attemptedItems.length}</div>
+      <div>Failed Attempts: {attemptedItems.length}</div>
     </Layout>
   );
 };
