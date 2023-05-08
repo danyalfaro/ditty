@@ -1,7 +1,6 @@
 import Board from "@/components/Board";
 import Layout from "@/components/Layout";
 import Search from "@/components/Search";
-import SocialLinks from "@/components/SocialLinks";
 import Spotify from "@/services/spotify";
 import { UserContext } from "@/shared/context";
 import {
@@ -37,6 +36,7 @@ const initializeBoardTiles = (
       id: challengePayload.items[i],
       tries: 0,
       success: false,
+      rank: i + 1,
     });
   }
   return boardTiles;
@@ -135,20 +135,7 @@ export const Challenge = ({
 
   // Adds the item matched to the corresponding board tile.
   const onSuccessMatch = (item: Artist | Track, matchedTileIndex: number) => {
-    setSearchOptions((previousItemWrappers) => {
-      let newItemWrappers = [...previousItemWrappers];
-      const searchOptionToUpdate = newItemWrappers.findIndex(
-        (attempt: ItemWrapper) => attempt?.data?.id === item.id
-      );
-      const updatedItem: ItemWrapper = {
-        ...newItemWrappers[searchOptionToUpdate],
-        isSuccess: true,
-        hasBeenAttempted: true,
-        rank: matchedTileIndex,
-      };
-      newItemWrappers[searchOptionToUpdate] = updatedItem;
-      return newItemWrappers;
-    });
+    setSearchOptions([]);
     setBoardTiles((previousBoardTiles) => {
       let newBoardTiles = [...previousBoardTiles];
       newBoardTiles[matchedTileIndex] = {
@@ -186,12 +173,14 @@ export const Challenge = ({
 
   return (
     <Layout>
-      <Search
-        handleSearch={handleSearch}
-        searchOptions={searchOptions}
-        onItemSelection={onItemSelection}
-      />
-      <div tabIndex={0} className="w-full flex justify-between py-8">
+      <div className="py-2 w-full">
+        <Search
+          handleSearch={handleSearch}
+          searchOptions={searchOptions}
+          onItemSelection={onItemSelection}
+        />
+      </div>
+      <div tabIndex={0} className="w-full hidden sm:flex justify-between">
         <h1>
           <span className="font-bold">Challenge sent by: </span>
           <span>{challenger}</span>
@@ -205,8 +194,15 @@ export const Challenge = ({
         </h1>
       </div>
 
-      <Board boardTiles={boardTiles} />
-      <SocialLinks />
+      <div className="py-4">
+        <Board boardTiles={boardTiles} />
+      </div>
+      {/* <SocialLinks /> */}
+      <div>
+        {`Matched ${
+          attemptedItems.filter((attempt) => attempt.isSuccess).length
+        } in ${attemptedItems.length} attempts.`}
+      </div>
     </Layout>
   );
 };
