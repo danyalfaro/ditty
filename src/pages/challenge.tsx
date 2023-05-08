@@ -59,7 +59,7 @@ export const Challenge = ({
 
   useEffect(() => {
     if (!user) {
-      // router.push(`${process.env.NEXT_PUBLIC_DITTY_URL}`);
+      router.push(`${process.env.NEXT_PUBLIC_DITTY_URL}`);
     }
   }, [user, router]);
 
@@ -173,12 +173,14 @@ export const Challenge = ({
 
   return (
     <Layout>
-      <Search
-        handleSearch={handleSearch}
-        searchOptions={searchOptions}
-        onItemSelection={onItemSelection}
-      />
-      <div tabIndex={0} className="w-full flex justify-between py-8">
+      <div className="py-2 w-full">
+        <Search
+          handleSearch={handleSearch}
+          searchOptions={searchOptions}
+          onItemSelection={onItemSelection}
+        />
+      </div>
+      <div tabIndex={0} className="w-full hidden sm:flex justify-between">
         <h1>
           <span className="font-bold">Challenge sent by: </span>
           <span>{challenger}</span>
@@ -192,9 +194,15 @@ export const Challenge = ({
         </h1>
       </div>
 
-      <Board boardTiles={boardTiles} />
+      <div className="py-4">
+        <Board boardTiles={boardTiles} />
+      </div>
       {/* <SocialLinks /> */}
-      <div>Failed Attempts: {attemptedItems.length}</div>
+      <div>
+        {`Matched ${
+          attemptedItems.filter((attempt) => attempt.isSuccess).length
+        } in ${attemptedItems.length} attempts.`}
+      </div>
     </Layout>
   );
 };
