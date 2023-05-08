@@ -29,11 +29,11 @@ export default function Tile({
       <div
         tabIndex={0}
         className={
-          "w-32 h-32 flex items-center justify-center rounded-full relative overflow-clip " +
+          "w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center rounded-full relative overflow-clip " +
           (animate
             ? "bg-green-400 transition ease-in-out duration-1000 "
             : getTileStyleByTries(boardTile.tries)) +
-          (boardTile?.data ? "" : "motion-safe:animate-pulse")
+          (boardTile?.data ? "" : " motion-safe:animate-pulse")
         }
       >
         {boardTile?.data &&

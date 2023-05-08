@@ -62,7 +62,10 @@ export const Board = ({ boardTiles }: { boardTiles: BoardTile[] }) => {
             )
             .map((boardTile) => {
               return (
-                <div key={boardTile.id} className={"w-full flex tile-left"}>
+                <div
+                  key={boardTile.id}
+                  className={"w-full pb-2 flex tile-left"}
+                >
                   <Tile
                     boardTile={boardTile}
                     animate={tilesToAnimate?.find((rank) => {
@@ -84,7 +87,10 @@ export const Board = ({ boardTiles }: { boardTiles: BoardTile[] }) => {
             )
             .map((boardTile) => {
               return (
-                <div key={boardTile.id} className={"w-full flex tile-left"}>
+                <div
+                  key={boardTile.id}
+                  className={"w-full pb-2 flex tile-left"}
+                >
                   <Tile
                     boardTile={boardTile}
                     animate={tilesToAnimate?.find((rank) => {
@@ -105,7 +111,10 @@ export const Board = ({ boardTiles }: { boardTiles: BoardTile[] }) => {
             )
             .map((boardTile) => {
               return (
-                <div key={boardTile.id} className={"w-full flex tile-left"}>
+                <div
+                  key={boardTile.id}
+                  className={"w-full pb-2 flex tile-left"}
+                >
                   <Tile
                     boardTile={boardTile}
                     animate={tilesToAnimate?.find((rank) => {
@@ -116,50 +125,6 @@ export const Board = ({ boardTiles }: { boardTiles: BoardTile[] }) => {
               );
             })}
         </div>
-        {/* {boardTiles.map((boardTile: BoardTile) => {
-          if (
-            boardTile.rank === 2 ||
-            boardTile.rank === 5 ||
-            boardTile.rank === 8
-          ) {
-            return (
-              <div key={boardTile.id} className={"w-full flex tile-left"}>
-                <Tile
-                  boardTile={boardTile}
-                  animate={tilesToAnimate?.find((rank) => {
-                    return rank === boardTile.rank;
-                  })}
-                />
-              </div>
-            );
-          } else if (
-            boardTile.rank === 1 ||
-            boardTile.rank === 4 ||
-            boardTile.rank === 7 ||
-            boardTile.rank === 10
-          ) {
-            return (
-              <div key={boardTile.id} className={"w-full flex tile-center"}>
-                <Tile
-                  boardTile={boardTile}
-                  animate={tilesToAnimate?.find((rank) => {
-                    return rank === boardTile.rank;
-                  })}
-                />
-              </div>
-            );
-          }
-          return (
-            <div key={boardTile.id} className={"w-full flex tile-right"}>
-              <Tile
-                boardTile={boardTile}
-                animate={tilesToAnimate?.find((rank) => {
-                  return rank === boardTile.rank;
-                })}
-              />
-            </div>
-          );
-        })} */}
       </div>
     </>
   );
