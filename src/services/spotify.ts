@@ -183,7 +183,7 @@ export default class Spotify {
   ): Promise<Artist[] | Track[]> => {
     if (!this.accessToken) {
       const redirectURI: string | undefined =
-        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_CHALLENGE_URI;
       this.getAccessToken(redirectURI);
       return [];
     }
@@ -198,7 +198,7 @@ export default class Spotify {
 
     if (!this.accessToken) {
       const redirectURI: string | undefined =
-        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_CHALLENGE_URI;
       this.getAccessToken(redirectURI);
       return [];
     }

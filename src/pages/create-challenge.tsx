@@ -18,7 +18,7 @@ export async function getServerSideProps({ query }: any) {
   if (!code) return { props: {} };
   const spotify = new Spotify({ spotifyTokenParam: code });
   const redirectURI: string | undefined =
-    process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+    process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_CHALLENGE_URI;
   const { accessToken, refreshToken } = await spotify.getAccessToken(
     redirectURI
   );

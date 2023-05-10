@@ -10,7 +10,7 @@ export default function Home() {
 
   const onSpotifyLogin = () => {
     const redirectURI: string | undefined =
-      process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
+      process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_CHALLENGE_URI;
     spotify.login(redirectURI);
   };
 
