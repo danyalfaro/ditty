@@ -3,6 +3,7 @@ import {
   ChallengeCategory,
   ChallengePayload,
   ChallengeTimeRange,
+  LocalStorageToken,
   TopItemsResponse,
 } from "@/shared/models";
 import { useContext, useEffect, useState } from "react";
@@ -15,10 +16,12 @@ export async function getServerSideProps({ query }: any) {
   const { code } = query;
   let user = {};
   if (!code) return { props: {} };
-  const spotify = new Spotify(code);
+  const spotify = new Spotify({ spotifyTokenParam: code });
   const redirectURI: string | undefined =
     process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_GAME_URI;
-  const [accessToken, refreshToken] = await spotify.getAccessToken(redirectURI);
+  const { accessToken, refreshToken } = await spotify.getAccessToken(
+    redirectURI
+  );
   if (accessToken) {
     user = await spotify.getUserProfile();
   }
@@ -27,7 +30,15 @@ export async function getServerSideProps({ query }: any) {
   };
 }
 
-export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
+export const CreateGame = ({
+  user,
+  accessToken,
+  refreshToken,
+}: {
+  user: any;
+  accessToken: LocalStorageToken;
+  refreshToken: LocalStorageToken;
+}) => {
   const [challengePayload, setChallengePayload] =
     useState<ChallengePayload | null>(null);
   const [challengeCategory, setChallengeCategory] = useState<ChallengeCategory>(
@@ -35,7 +46,7 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
   );
   const [challengeTimeRange, setChallengeTimeRange] =
     useState<ChallengeTimeRange>(ChallengeTimeRange.RECENT);
-  const spotify = new Spotify();
+  const spotify = new Spotify({ accessToken, refreshToken });
   const router = useRouter();
   const { user: activeUser, setUser } = useContext(UserContext);
 
@@ -49,11 +60,8 @@ export const CreateGame = ({ user, accessToken, refreshToken }: any) => {
     }
   }, [accessToken, activeUser, refreshToken, router, setUser, user]);
 
-  const storeToken = (label: string, token: string | string[]) => {
-    localStorage.setItem(
-      label,
-      JSON.stringify({ dateStamp: new Date(), token: token.toString() })
-    );
+  const storeToken = (label: string, token: LocalStorageToken) => {
+    localStorage.setItem(label, JSON.stringify(token));
   };
 
   const spotifyResponseToChallengePayload = (

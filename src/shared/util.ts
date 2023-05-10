@@ -1,4 +1,4 @@
-import { ChallengePayload } from "./models";
+import { ChallengePayload, LocalStorageToken } from "./models";
 
 export const challengeTokenToShareableLink = (
   challengeToken: string
@@ -6,6 +6,16 @@ export const challengeTokenToShareableLink = (
   return `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`;
 };
 
+export const tokenToTokenWrapper = (
+  token: string,
+  expiresIn: number | null = null
+): LocalStorageToken => {
+  return {
+    dateStamp: new Date().toISOString(),
+    expiresIn: expiresIn,
+    token: token.toString(),
+  };
+};
 
 export const decodeChallengeToken = (token: string): ChallengePayload => {
   const decoded = Buffer.from(token, "hex").toString();

@@ -54,7 +54,7 @@ export const Challenge = ({
     initializeBoardTiles(challengePayload)
   );
   const router = useRouter();
-  const spotify = new Spotify();
+  const spotify = new Spotify({});
   const { challenger, challengeCategory, items } = challengePayload;
 
   useEffect(() => {

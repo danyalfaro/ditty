@@ -6,7 +6,7 @@ import Layout from "@/components/Layout";
 export default function Home() {
   const router = useRouter();
   const { code: spotifyTokenParam } = router.query;
-  const spotify = new Spotify(spotifyTokenParam);
+  const spotify = new Spotify({ spotifyTokenParam });
 
   const onSpotifyLogin = () => {
     const redirectURI: string | undefined =

@@ -112,6 +112,7 @@ export type BoardTile = {
 
 export type LocalStorageToken = {
   dateStamp: string; //ISO String,
+  expiresIn: number | null;
   token: string;
 };
 
@@ -126,7 +127,20 @@ export type User = {
   uri: string;
 };
 
+export type SpotifyTokenResponse = {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+  scope: string;
+};
+
 export type Tokens = {
   accessToken: string;
   refreshToken: string;
 };
+
+export enum TokenTypes {
+  ACCESS_TOKEN = "accessToken",
+  REFRESH_TOKEN = "refreshToken",
+}
