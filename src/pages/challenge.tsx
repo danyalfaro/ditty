@@ -10,17 +10,30 @@ import {
   ChallengePayload,
   ItemWrapper,
   Track,
+  User,
 } from "@/shared/models";
-import { decodeChallengeToken } from "@/shared/util";
+import { decodeChallengeToken, storeToken } from "@/shared/util";
 import { useRouter } from "next/router";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useContext } from "react";
 
 export async function getServerSideProps({ query }: any) {
-  const { challengeToken } = query;
-  if (!challengeToken) return { props: {} };
-  const challengePayload: ChallengePayload =
+  const { challengeToken, code } = query;
+  const challengePayload: ChallengePayload | null =
     decodeChallengeToken(challengeToken);
+
+  const spotify = new Spotify({ spotifyTokenParam: code });
+  const redirectURI: string | undefined =
+    process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
+  const { accessToken, refreshToken } = await spotify.getAccessToken(
+    redirectURI
+  );
+  if (accessToken) {
+    const user = await spotify.getUserProfile();
+    return {
+      props: { user, challengePayload },
+    };
+  }
   return {
     props: { challengePayload },
   };
@@ -43,25 +56,65 @@ const initializeBoardTiles = (
 };
 
 export const Challenge = ({
-  challengePayload,
+  challengePayload: challengePayloadProps,
+  user,
 }: {
+  user?: User;
   challengePayload: ChallengePayload;
 }) => {
-  const { user, setUser } = useContext(UserContext);
+  const { user: activeUser, setUser } = useContext(UserContext);
+  const [challengePayload, setChallengePayload] = useState<ChallengePayload>();
   const [searchOptions, setSearchOptions] = useState<ItemWrapper[]>([]);
   const [attemptedItems, setAttemptedItems] = useState<ItemWrapper[]>([]);
-  const [boardTiles, setBoardTiles] = useState<BoardTile[]>(
-    initializeBoardTiles(challengePayload)
-  );
+  const [boardTiles, setBoardTiles] = useState<BoardTile[]>([]);
   const router = useRouter();
   const spotify = new Spotify({});
-  const { challenger, challengeCategory, items } = challengePayload;
+
+  const onSpotifyLogin = () => {
+    const redirectURI: string | undefined =
+      process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
+    spotify.login(redirectURI);
+  };
 
   useEffect(() => {
-    if (!user) {
-      router.push(`${process.env.NEXT_PUBLIC_DITTY_URL}`);
+    // Handle when user is logged in
+    if (activeUser) {
+      if (challengePayloadProps) {
+        setChallengePayload(challengePayloadProps);
+        setBoardTiles(initializeBoardTiles(challengePayloadProps));
+      } else {
+        const localStorageChallengeToken =
+          localStorage.getItem("challengeToken");
+        if (localStorageChallengeToken) {
+          const localStorageChallengeTokenJSON: ChallengePayload = JSON.parse(
+            localStorageChallengeToken
+          );
+          setChallengePayload(localStorageChallengeTokenJSON);
+          setBoardTiles(initializeBoardTiles(localStorageChallengeTokenJSON));
+        }
+      }
     }
-  }, [user, router]);
+    // Handle user not logged in
+    else {
+      if (user) {
+        setUser(user);
+        const challengeTokenFromLocalStorage =
+          localStorage.getItem("challengeToken");
+        if (challengeTokenFromLocalStorage) {
+          const localStorageChallengeTokenJSON: ChallengePayload = JSON.parse(
+            challengeTokenFromLocalStorage
+          );
+          setChallengePayload(localStorageChallengeTokenJSON);
+          setBoardTiles(initializeBoardTiles(localStorageChallengeTokenJSON));
+        }
+      } else {
+        if (challengePayloadProps) {
+          storeToken("challengeToken", challengePayloadProps);
+        }
+        onSpotifyLogin();
+      }
+    }
+  }, []);
 
   const findAttemptByItem = (item: any): ItemWrapper | undefined => {
     return attemptedItems.find(
@@ -73,7 +126,8 @@ export const Challenge = ({
     const { value: query } = event.target;
 
     // TODO: add debounce
-    if (query.length > 1) {
+    if (query.length > 1 && challengePayload) {
+      const { challengeCategory } = challengePayload;
       const res = await spotify.searchItems(query, challengeCategory);
       setSearchOptions(
         res.map((item: any): ItemWrapper => {
@@ -110,9 +164,13 @@ export const Challenge = ({
   };
 
   const isTopDittyMatch = (id: string): number => {
-    return items.findIndex((item) => {
-      return item === id;
-    });
+    if (challengePayload) {
+      const { items } = challengePayload;
+      return items.findIndex((item) => {
+        return item === id;
+      });
+    }
+    return -1;
   };
 
   const addAttempt = (item: Artist | Track): boolean => {
@@ -183,13 +241,15 @@ export const Challenge = ({
       <div tabIndex={0} className="w-full hidden sm:flex justify-between">
         <h1>
           <span className="font-bold">Challenge sent by: </span>
-          <span>{challenger}</span>
+          <span>{challengePayload?.challenger}</span>
         </h1>
         <h1>
           <span className="font-bold">Category: </span>
           <span>
-            {challengeCategory.charAt(0).toUpperCase() +
-              challengeCategory.slice(1)}
+            {challengePayload
+              ? challengePayload?.challengeCategory.charAt(0).toUpperCase() +
+                challengePayload?.challengeCategory.slice(1)
+              : ""}
           </span>
         </h1>
       </div>

@@ -1,5 +1,12 @@
 import { ChallengePayload, LocalStorageToken } from "./models";
 
+export const storeToken = (
+  label: string,
+  token: LocalStorageToken | ChallengePayload
+) => {
+  localStorage.setItem(label, JSON.stringify(token));
+};
+
 export const challengeTokenToShareableLink = (
   challengeToken: string
 ): string => {
@@ -17,7 +24,10 @@ export const tokenToTokenWrapper = (
   };
 };
 
-export const decodeChallengeToken = (token: string): ChallengePayload => {
+export const decodeChallengeToken = (
+  token: string
+): ChallengePayload | null => {
+  if (!token) return null;
   const decoded = Buffer.from(token, "hex").toString();
   return JSON.parse(decoded);
 };

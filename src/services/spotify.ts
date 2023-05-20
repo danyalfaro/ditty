@@ -19,7 +19,7 @@ export default class Spotify {
   spotifyTokenParam: string | string[] | undefined;
   clientSecret: string | undefined;
   refreshToken: LocalStorageToken | null;
-  accessToken: LocalStorageToken | null;
+  _accessToken: LocalStorageToken;
   tokenType: string;
   spotifyAPI: AxiosInstance;
 
@@ -39,7 +39,8 @@ export default class Spotify {
     this.spotifyTokenParam = spotifyTokenParam;
     this.refreshToken =
       refreshToken || this.getTokenFromStorage(TokenTypes.REFRESH_TOKEN);
-    this.accessToken =
+
+    this._accessToken =
       accessToken || this.getTokenFromStorage(TokenTypes.ACCESS_TOKEN);
 
     this.tokenType = "Bearer";
@@ -125,6 +126,14 @@ export default class Spotify {
       );
     }
   };
+
+  public set accessToken(token: LocalStorageToken) {
+    this._accessToken = token;
+  }
+
+  public get accessToken(): LocalStorageToken {
+    return this._accessToken;
+  }
 
   getAccessToken = async (redirectURI: string | undefined) => {
     if (!this.accessToken && redirectURI) {

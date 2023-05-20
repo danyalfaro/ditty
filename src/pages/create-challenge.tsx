@@ -5,9 +5,10 @@ import {
   ChallengeTimeRange,
   LocalStorageToken,
   TopItemsResponse,
+  User,
 } from "@/shared/models";
 import { useContext, useEffect, useState } from "react";
-import { encodeChallengeToken } from "@/shared/util";
+import { encodeChallengeToken, storeToken } from "@/shared/util";
 import { useRouter } from "next/router";
 import Layout from "@/components/Layout";
 import { UserContext } from "@/shared/context";
@@ -35,7 +36,7 @@ export const CreateGame = ({
   accessToken,
   refreshToken,
 }: {
-  user: any;
+  user: User;
   accessToken: LocalStorageToken;
   refreshToken: LocalStorageToken;
 }) => {
@@ -59,10 +60,6 @@ export const CreateGame = ({
       storeToken("refreshToken", refreshToken);
     }
   }, [accessToken, activeUser, refreshToken, router, setUser, user]);
-
-  const storeToken = (label: string, token: LocalStorageToken) => {
-    localStorage.setItem(label, JSON.stringify(token));
-  };
 
   const spotifyResponseToChallengePayload = (
     response: TopItemsResponse
