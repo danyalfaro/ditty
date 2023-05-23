@@ -5,12 +5,11 @@ import Layout from "@/components/Layout";
 
 export default function Home() {
   const router = useRouter();
-  const { code: spotifyTokenParam } = router.query;
-  const spotify = new Spotify({ spotifyTokenParam });
+  const spotify = new Spotify({});
 
   const onSpotifyLogin = () => {
     const redirectURI: string | undefined =
-      process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_CHALLENGE_URI;
+      process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
     spotify.login(redirectURI);
   };
 
@@ -34,7 +33,7 @@ export default function Home() {
             onClick={onSpotifyLogin}
             className="bg-green-600 text-slate-100 p-4 border-solid rounded-md w-full"
           >
-            Start Game
+            Login With Spotify
           </button>
           <button
             className="text-slate-500 p-4 border-solid rounded-md w-full"

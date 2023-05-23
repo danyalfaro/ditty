@@ -1,4 +1,5 @@
 import Board from "@/components/Board";
+import CreateGame from "@/components/create-challenge";
 import Layout from "@/components/Layout";
 import Search from "@/components/Search";
 import Spotify from "@/services/spotify";
@@ -8,32 +9,112 @@ import {
   BoardTile,
   ChallengeCategory,
   ChallengePayload,
+  ChallengeTimeRange,
   ItemWrapper,
+  LocalStorageToken,
+  TopItemsResponse,
   Track,
   User,
 } from "@/shared/models";
-import { decodeChallengeToken, storeToken } from "@/shared/util";
-import { useRouter } from "next/router";
+import {
+  decodeChallengeToken,
+  encodeChallengeToken,
+  storeToken,
+} from "@/shared/util";
+import Router, { useRouter } from "next/router";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useContext } from "react";
 
+enum ChallengePageState {
+  CREATION = "CREATION",
+  GAMEPLAY = "GAMEPLAY",
+  PROMPT = "PROMPT",
+  LOADING = "LOADING",
+  ERROR = "ERROR",
+}
+
+enum ChallengePageEvent {
+  LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL",
+  LOGIN_FAILED = "LOGIN_FAILED",
+  DECODING_SUCCESSFUL = "DECODING_SUCCESSFUL",
+  DECODING_FAILED = "DECODING_FAILED",
+}
+
+type ChallengePageProps =
+  | {
+      event: ChallengePageEvent.LOGIN_SUCCESSFUL;
+      data: {
+        user: User;
+        accessToken: LocalStorageToken;
+        refreshToken: LocalStorageToken;
+      };
+    }
+  | {
+      event: ChallengePageEvent.LOGIN_FAILED;
+      error: string;
+    }
+  | {
+      event: ChallengePageEvent.DECODING_SUCCESSFUL;
+      data: {
+        challengePayload: ChallengePayload;
+      };
+    }
+  | {
+      event: ChallengePageEvent.DECODING_FAILED;
+      error: string;
+    };
+
 export async function getServerSideProps({ query }: any) {
   const { challengeToken, code } = query;
+
+  // Handle login to spotify.
+  if (code && !challengeToken) {
+    const spotify = new Spotify({ spotifyTokenParam: code });
+    const { accessToken, refreshToken } = await spotify.getAccessToken(
+      process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI
+    );
+    if (accessToken) {
+      const user = await spotify.getUserProfile();
+      const props: ChallengePageProps = {
+        event: ChallengePageEvent.LOGIN_SUCCESSFUL,
+        data: { user, accessToken, refreshToken },
+      };
+      return {
+        props,
+      };
+    } else {
+      const props: ChallengePageProps = {
+        event: ChallengePageEvent.LOGIN_FAILED,
+        error: "User not logged in.",
+      };
+      return {
+        props,
+      };
+    }
+  } else if (!code && challengeToken) {
+    const challengeTokenFromURL = decodeChallengeToken(challengeToken);
+    if (challengeTokenFromURL) {
+      const props: ChallengePageProps = {
+        event: ChallengePageEvent.DECODING_SUCCESSFUL,
+        data: { challengePayload: challengeTokenFromURL },
+      };
+      return {
+        props,
+      };
+    } else {
+      const props: ChallengePageProps = {
+        event: ChallengePageEvent.DECODING_FAILED,
+        error: "Challenge token not valid.",
+      };
+      return {
+        props,
+      };
+    }
+  }
+
   const challengePayload: ChallengePayload | null =
     decodeChallengeToken(challengeToken);
 
-  const spotify = new Spotify({ spotifyTokenParam: code });
-  const redirectURI: string | undefined =
-    process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
-  const { accessToken, refreshToken } = await spotify.getAccessToken(
-    redirectURI
-  );
-  if (accessToken) {
-    const user = await spotify.getUserProfile();
-    return {
-      props: { user, challengePayload },
-    };
-  }
   return {
     props: { challengePayload },
   };
@@ -55,66 +136,82 @@ const initializeBoardTiles = (
   return boardTiles;
 };
 
-export const Challenge = ({
-  challengePayload: challengePayloadProps,
-  user,
-}: {
-  user?: User;
-  challengePayload: ChallengePayload;
-}) => {
-  const { user: activeUser, setUser } = useContext(UserContext);
+export const Challenge = (challengePageProps: ChallengePageProps) => {
+  const { user, setUser } = useContext(UserContext);
   const [challengePayload, setChallengePayload] = useState<ChallengePayload>();
   const [searchOptions, setSearchOptions] = useState<ItemWrapper[]>([]);
   const [attemptedItems, setAttemptedItems] = useState<ItemWrapper[]>([]);
   const [boardTiles, setBoardTiles] = useState<BoardTile[]>([]);
-  const router = useRouter();
-  const spotify = new Spotify({});
-
-  const onSpotifyLogin = () => {
-    const redirectURI: string | undefined =
-      process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
-    spotify.login(redirectURI);
-  };
+  const [challengePageState, setChallengePageState] =
+    useState<ChallengePageState>(ChallengePageState.LOADING);
+  let spotify = new Spotify({});
+  if (challengePageProps.event === ChallengePageEvent.LOGIN_SUCCESSFUL) {
+    const { accessToken, refreshToken } = challengePageProps.data;
+    spotify.accessToken = accessToken;
+    spotify.refreshToken = refreshToken;
+  }
 
   useEffect(() => {
-    // Handle when user is logged in
-    if (activeUser) {
-      if (challengePayloadProps) {
-        setChallengePayload(challengePayloadProps);
-        setBoardTiles(initializeBoardTiles(challengePayloadProps));
+    if (challengePageProps.event === ChallengePageEvent.LOGIN_SUCCESSFUL) {
+      const { data } = challengePageProps;
+      // Set user, check for local storage challenge payload.
+      // If no valid challenge payload in local storage, then show Challenge Creation component.
+      setUser(data.user);
+      const challengePayloadFromLocalStorage = findChallengePayload();
+      if (challengePayloadFromLocalStorage) {
+        setChallengePayload(challengePayloadFromLocalStorage);
+        setBoardTiles(initializeBoardTiles(challengePayloadFromLocalStorage));
+        Router.push(
+          {
+            pathname: "/challenge",
+            query: {
+              challengeToken: encodeChallengeToken(
+                challengePayloadFromLocalStorage
+              ),
+            },
+          },
+          undefined,
+          { shallow: true }
+        );
+
+        setChallengePageState(ChallengePageState.GAMEPLAY);
       } else {
-        const localStorageChallengeToken =
-          localStorage.getItem("challengeToken");
-        if (localStorageChallengeToken) {
-          const localStorageChallengeTokenJSON: ChallengePayload = JSON.parse(
-            localStorageChallengeToken
-          );
-          setChallengePayload(localStorageChallengeTokenJSON);
-          setBoardTiles(initializeBoardTiles(localStorageChallengeTokenJSON));
-        }
+        setChallengePageState(ChallengePageState.CREATION);
       }
-    }
-    // Handle user not logged in
-    else {
-      if (user) {
-        setUser(user);
-        const challengeTokenFromLocalStorage =
-          localStorage.getItem("challengeToken");
-        if (challengeTokenFromLocalStorage) {
-          const localStorageChallengeTokenJSON: ChallengePayload = JSON.parse(
-            challengeTokenFromLocalStorage
-          );
-          setChallengePayload(localStorageChallengeTokenJSON);
-          setBoardTiles(initializeBoardTiles(localStorageChallengeTokenJSON));
-        }
-      } else {
-        if (challengePayloadProps) {
-          storeToken("challengeToken", challengePayloadProps);
-        }
+    } else if (challengePageProps.event === ChallengePageEvent.LOGIN_FAILED) {
+      setChallengePageState(ChallengePageState.ERROR);
+    } else if (
+      challengePageProps.event === ChallengePageEvent.DECODING_SUCCESSFUL
+    ) {
+      // TODO check weather it was a page refresh or a new game...
+      // Validate using local storage if the game is saved in local storage, else
+      // show PROMPT, anyway user will need to Login.
+      const challengePayloadFromLocalStorage = findChallengePayload();
+      if (
+        JSON.stringify(challengePageProps.data.challengePayload) ===
+        JSON.stringify(challengePayloadFromLocalStorage)
+      ) {
         onSpotifyLogin();
+      } else {
+        setChallengePageState(ChallengePageState.PROMPT);
       }
+    } else if (
+      challengePageProps.event === ChallengePageEvent.DECODING_FAILED
+    ) {
+      setChallengePageState(ChallengePageState.ERROR);
     }
   }, []);
+
+  const findChallengePayload = (): ChallengePayload | undefined => {
+    const challengePayloadFromLocalStorage =
+      localStorage.getItem("challengePayload");
+    if (challengePayloadFromLocalStorage) {
+      const localStorageChallengePayloadJSON: ChallengePayload = JSON.parse(
+        challengePayloadFromLocalStorage
+      );
+      return localStorageChallengePayloadJSON;
+    } else return undefined;
+  };
 
   const findAttemptByItem = (item: any): ItemWrapper | undefined => {
     return attemptedItems.find(
@@ -229,40 +326,110 @@ export const Challenge = ({
     });
   };
 
+  const onCreationSubmit = async (
+    category: ChallengeCategory,
+    timeRange: ChallengeTimeRange
+  ) => {
+    setChallengePageState(ChallengePageState.GAMEPLAY);
+    const { challengePayload } = await getTopItems(category, timeRange);
+    if (challengePayload) {
+      setChallengePayload(challengePayload);
+      setBoardTiles(initializeBoardTiles(challengePayload));
+    }
+  };
+
+  const onSpotifyLogin = () => {
+    const redirectURI: string | undefined =
+      process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
+    spotify.login(redirectURI);
+  };
+
+  const handleAcceptChallenge = () => {
+    // TODO: SAVE PAYLOAD INTO LOCALSTORAGE, LOGIN TO SPOTIFY.
+  }
+
+  const getTopItems = async (
+    category: ChallengeCategory,
+    timeRange: ChallengeTimeRange
+  ): Promise<{
+    challengePayload: ChallengePayload;
+    challengeToken: string;
+  }> => {
+    const topItems = await spotify.getTopItems(category, timeRange);
+    const challengePayload: ChallengePayload = {
+      challenger: `${user.display_name}`,
+      challengeCategory: category,
+      items: topItems.map((item: Artist | Track) => item.id),
+    };
+    const challengeToken = encodeChallengeToken(challengePayload);
+    storeToken("challengePayload", challengePayload);
+    return {
+      challengePayload,
+      challengeToken,
+    };
+  };
+
   return (
     <Layout>
-      <div className="py-2 w-full">
-        <Search
-          handleSearch={handleSearch}
-          searchOptions={searchOptions}
-          onItemSelection={onItemSelection}
-        />
-      </div>
-      <div tabIndex={0} className="w-full hidden sm:flex justify-between">
-        <h1>
-          <span className="font-bold">Challenge sent by: </span>
-          <span>{challengePayload?.challenger}</span>
-        </h1>
-        <h1>
-          <span className="font-bold">Category: </span>
-          <span>
-            {challengePayload
-              ? challengePayload?.challengeCategory.charAt(0).toUpperCase() +
-                challengePayload?.challengeCategory.slice(1)
-              : ""}
-          </span>
-        </h1>
-      </div>
+      {challengePageState === ChallengePageState.LOADING && (
+        <div>LOADING...</div>
+      )}
+      {challengePageState === ChallengePageState.ERROR && <div>ERROR...</div>}
+      {challengePageState === ChallengePageState.CREATION && (
+        <CreateGame onSubmit={onCreationSubmit} />
+      )}
+      {challengePageState === ChallengePageState.PROMPT && (
+        <>
+          <h1>
+            WELCOME! you have been sent a game :) login to spotify to play :)
+          </h1>
+          <button
+            type="button"
+            onClick={handleAcceptChallenge}
+            className="bg-green-600 text-slate-100 p-4 border-solid rounded-md w-full"
+          >
+            Login With Spotify
+          </button>
+        </>
+      )}
+      {challengePageState === ChallengePageState.GAMEPLAY && (
+        <>
+          <div className="py-2 w-full">
+            <Search
+              handleSearch={handleSearch}
+              searchOptions={searchOptions}
+              onItemSelection={onItemSelection}
+            />
+          </div>
+          <div tabIndex={0} className="w-full hidden sm:flex justify-between">
+            <h1>
+              <span className="font-bold">Challenge sent by: </span>
+              <span>{challengePayload?.challenger}</span>
+            </h1>
+            <h1>
+              <span className="font-bold">Category: </span>
+              <span>
+                {challengePayload
+                  ? challengePayload?.challengeCategory
+                      .charAt(0)
+                      .toUpperCase() +
+                    challengePayload?.challengeCategory.slice(1)
+                  : ""}
+              </span>
+            </h1>
+          </div>
 
-      <div className="py-4">
-        <Board boardTiles={boardTiles} />
-      </div>
-      {/* <SocialLinks /> */}
-      <div>
-        {`Matched ${
-          attemptedItems.filter((attempt) => attempt.isSuccess).length
-        } in ${attemptedItems.length} attempts.`}
-      </div>
+          <div className="py-4">
+            <Board boardTiles={boardTiles} />
+          </div>
+          {/* <SocialLinks /> */}
+          <div>
+            {`Matched ${
+              attemptedItems.filter((attempt) => attempt.isSuccess).length
+            } in ${attemptedItems.length} attempts.`}
+          </div>
+        </>
+      )}
     </Layout>
   );
 };

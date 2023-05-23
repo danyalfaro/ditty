@@ -15,13 +15,13 @@ import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 export const REFRESH_TOKEN_BUFFER = 5 * 60 * 1000;
 
 export default class Spotify {
-  clientId: string | undefined;
-  spotifyTokenParam: string | string[] | undefined;
-  clientSecret: string | undefined;
-  refreshToken: LocalStorageToken | null;
-  _accessToken: LocalStorageToken;
-  tokenType: string;
-  spotifyAPI: AxiosInstance;
+  private clientId: string | undefined;
+  private spotifyTokenParam: string | string[] | undefined;
+  private clientSecret: string | undefined;
+  private _refreshToken: LocalStorageToken;
+  private _accessToken: LocalStorageToken;
+  private tokenType: string;
+  private spotifyAPI: AxiosInstance;
 
   constructor({
     spotifyTokenParam,
@@ -37,7 +37,7 @@ export default class Spotify {
     this.clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
     this.clientSecret = process.env.NEXT_PUBLIC_SECRET;
     this.spotifyTokenParam = spotifyTokenParam;
-    this.refreshToken =
+    this._refreshToken =
       refreshToken || this.getTokenFromStorage(TokenTypes.REFRESH_TOKEN);
 
     this._accessToken =
@@ -135,6 +135,14 @@ export default class Spotify {
     return this._accessToken;
   }
 
+  public set refreshToken(token: LocalStorageToken) {
+    this._refreshToken = token;
+  }
+
+  public get refreshToken(): LocalStorageToken {
+    return this._refreshToken;
+  }
+
   getAccessToken = async (redirectURI: string | undefined) => {
     if (!this.accessToken && redirectURI) {
       try {
@@ -190,9 +198,10 @@ export default class Spotify {
     category: ChallengeCategory,
     timeRange: ChallengeTimeRange
   ): Promise<Artist[] | Track[]> => {
+    console.log(this.accessToken);
     if (!this.accessToken) {
       const redirectURI: string | undefined =
-        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_CHALLENGE_URI;
+        process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
       this.getAccessToken(redirectURI);
       return [];
     }
@@ -207,7 +216,7 @@ export default class Spotify {
 
     if (!this.accessToken) {
       const redirectURI: string | undefined =
-        process.env.NEXT_PUBLIC_REDIRECT_TO_CREATE_CHALLENGE_URI;
+        process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
       this.getAccessToken(redirectURI);
       return [];
     }

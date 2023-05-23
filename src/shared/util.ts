@@ -28,8 +28,13 @@ export const decodeChallengeToken = (
   token: string
 ): ChallengePayload | null => {
   if (!token) return null;
-  const decoded = Buffer.from(token, "hex").toString();
-  return JSON.parse(decoded);
+  try {
+    const decoded = Buffer.from(token, "hex").toString();
+    return JSON.parse(decoded);
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
 };
 
 export const encodeChallengeToken = (
