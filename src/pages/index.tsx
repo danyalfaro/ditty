@@ -1,16 +1,12 @@
 import Head from "next/head";
-import { useRouter } from "next/router";
-import Spotify from "@/services/spotify";
 import Layout from "@/components/Layout";
+import { login } from "@/services/useSpotify";
 
 export default function Home() {
-  const router = useRouter();
-  const spotify = new Spotify({});
-
   const onSpotifyLogin = () => {
     const redirectURI: string | undefined =
       process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
-    spotify.login(redirectURI);
+    login(redirectURI);
   };
 
   const onHowToPlay = () => {

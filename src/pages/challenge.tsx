@@ -2,8 +2,8 @@ import Board from "@/components/Board";
 import CreateGame from "@/components/create-challenge";
 import Layout from "@/components/Layout";
 import Search from "@/components/Search";
-import Spotify from "@/services/spotify";
-import { UserContext } from "@/shared/context";
+import useSpotify, { getUserFromLoginCode, login } from "@/services/useSpotify";
+import { AuthContext } from "@/shared/context";
 import {
   Artist,
   BoardTile,
@@ -69,12 +69,9 @@ export async function getServerSideProps({ query }: any) {
 
   // Handle login to spotify.
   if (code && !challengeToken) {
-    const spotify = new Spotify({ spotifyTokenParam: code });
-    const { accessToken, refreshToken } = await spotify.getAccessToken(
-      process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI
-    );
-    if (accessToken) {
-      const user = await spotify.getUserProfile();
+    const { accessToken, refreshToken, user } =
+      (await getUserFromLoginCode(code)) || {};
+    if (accessToken && refreshToken && user) {
       const props: ChallengePageProps = {
         event: ChallengePageEvent.LOGIN_SUCCESSFUL,
         data: { user, accessToken, refreshToken },
@@ -137,19 +134,15 @@ const initializeBoardTiles = (
 };
 
 export const Challenge = (challengePageProps: ChallengePageProps) => {
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, setAccessToken, setRefreshToken } =
+    useContext(AuthContext);
+  const { getTopItems, searchItems } = useSpotify();
   const [challengePayload, setChallengePayload] = useState<ChallengePayload>();
   const [searchOptions, setSearchOptions] = useState<ItemWrapper[]>([]);
   const [attemptedItems, setAttemptedItems] = useState<ItemWrapper[]>([]);
   const [boardTiles, setBoardTiles] = useState<BoardTile[]>([]);
   const [challengePageState, setChallengePageState] =
     useState<ChallengePageState>(ChallengePageState.LOADING);
-  let spotify = new Spotify({});
-  if (challengePageProps.event === ChallengePageEvent.LOGIN_SUCCESSFUL) {
-    const { accessToken, refreshToken } = challengePageProps.data;
-    spotify.accessToken = accessToken;
-    spotify.refreshToken = refreshToken;
-  }
 
   useEffect(() => {
     if (challengePageProps.event === ChallengePageEvent.LOGIN_SUCCESSFUL) {
@@ -157,6 +150,8 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
       // Set user, check for local storage challenge payload.
       // If no valid challenge payload in local storage, then show Challenge Creation component.
       setUser(data.user);
+      setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
       const challengePayloadFromLocalStorage = findChallengePayload();
       if (challengePayloadFromLocalStorage) {
         setChallengePayload(challengePayloadFromLocalStorage);
@@ -183,9 +178,6 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
     } else if (
       challengePageProps.event === ChallengePageEvent.DECODING_SUCCESSFUL
     ) {
-      // TODO check weather it was a page refresh or a new game...
-      // Validate using local storage if the game is saved in local storage, else
-      // show PROMPT, anyway user will need to Login.
       const challengePayloadFromLocalStorage = findChallengePayload();
       if (
         JSON.stringify(challengePageProps.data.challengePayload) ===
@@ -225,7 +217,7 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
     // TODO: add debounce
     if (query.length > 1 && challengePayload) {
       const { challengeCategory } = challengePayload;
-      const res = await spotify.searchItems(query, challengeCategory);
+      const res = await searchItems(query, challengeCategory);
       setSearchOptions(
         res.map((item: any): ItemWrapper => {
           const attemptByItem = findAttemptByItem(item);
@@ -331,31 +323,41 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
     timeRange: ChallengeTimeRange
   ) => {
     setChallengePageState(ChallengePageState.GAMEPLAY);
-    const { challengePayload } = await getTopItems(category, timeRange);
+    const { challengePayload } = await getChallengePayload(category, timeRange);
     if (challengePayload) {
       setChallengePayload(challengePayload);
       setBoardTiles(initializeBoardTiles(challengePayload));
+      Router.push(
+        {
+          pathname: "/challenge",
+          query: {
+            challengeToken: encodeChallengeToken(challengePayload),
+          },
+        },
+        undefined,
+        { shallow: true }
+      );
     }
   };
 
   const onSpotifyLogin = () => {
     const redirectURI: string | undefined =
       process.env.NEXT_PUBLIC_REDIRECT_TO_CHALLENGE_URI;
-    spotify.login(redirectURI);
+    login(redirectURI);
   };
 
   const handleAcceptChallenge = () => {
     // TODO: SAVE PAYLOAD INTO LOCALSTORAGE, LOGIN TO SPOTIFY.
-  }
+  };
 
-  const getTopItems = async (
+  const getChallengePayload = async (
     category: ChallengeCategory,
     timeRange: ChallengeTimeRange
   ): Promise<{
     challengePayload: ChallengePayload;
     challengeToken: string;
   }> => {
-    const topItems = await spotify.getTopItems(category, timeRange);
+    const topItems = await getTopItems(category, timeRange);
     const challengePayload: ChallengePayload = {
       challenger: `${user.display_name}`,
       challengeCategory: category,
