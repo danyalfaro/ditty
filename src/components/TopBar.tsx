@@ -1,9 +1,9 @@
-import { UserContext } from "@/shared/context";
-import { useContext, useEffect } from "react";
+import { AuthContext } from "@/shared/context";
+import { useContext } from "react";
 import { GiHamburgerMenu } from "react-icons/gi";
 
 export default function TopBar() {
-  const { user, setUser } = useContext(UserContext);
+  const { user } = useContext(AuthContext);
 
   return (
     <>

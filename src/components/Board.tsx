@@ -14,10 +14,6 @@ export const Board = ({ boardTiles }: { boardTiles: BoardTile[] }) => {
 
   useEffect(() => {
     checkTilesForChanges();
-    const matched: number = boardTiles.filter((tile) => tile.success).length;
-    {
-      console.log(`Number of matched tiles: ${matched}`);
-    }
     setPreviousTiles(boardTiles);
   }, [boardTiles]);
 
