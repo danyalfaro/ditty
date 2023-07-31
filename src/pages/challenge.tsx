@@ -19,6 +19,7 @@ import {
 import {
   decodeChallengeToken,
   encodeChallengeToken,
+  removeToken,
   storeToken,
 } from "@/shared/util";
 import Router, { useRouter } from "next/router";
@@ -211,9 +212,7 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
     );
   };
 
-  const handleSearch = async (event: ChangeEvent<HTMLInputElement>) => {
-    const { value: query } = event.target;
-
+  const handleSearch = async (query: string) => {
     // TODO: add debounce
     if (query.length > 1 && challengePayload) {
       const { challengeCategory } = challengePayload;
@@ -316,6 +315,11 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
         return newBoardTile;
       });
     });
+  };
+
+  const onCancelChallenge = () => {
+    removeToken("challengePayload");
+    Router.push("/");
   };
 
   const onCreationSubmit = async (

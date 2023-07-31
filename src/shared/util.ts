@@ -7,6 +7,10 @@ export const storeToken = (
   localStorage.setItem(label, JSON.stringify(token));
 };
 
+export const removeToken = (label: string) => {
+  localStorage.removeItem(label);
+};
+
 export const challengeTokenToShareableLink = (
   challengeToken: string
 ): string => {

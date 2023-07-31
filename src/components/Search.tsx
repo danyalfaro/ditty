@@ -1,19 +1,40 @@
-// import Spotify from "@/services/spotify";
 import { ItemWrapper } from "@/shared/models";
 import Image from "next/image";
+import { useState } from "react";
+import _ from "lodash";
 
 export const Search = ({
   searchOptions,
   handleSearch,
   onItemSelection,
 }: any) => {
+  const [inputValue, setInputValue] = useState<string>("");
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  const handleSearchInputChange = (event: any) => {
+    const {
+      target: { value: query },
+    } = event;
+    setInputValue(query);
+    if (timeoutId) clearTimeout(timeoutId);
+    if (query.length < 1) {
+      handleSearch("");
+    } else {
+      const newTimeoutId: NodeJS.Timeout = setTimeout(() => {
+        handleSearch(inputValue);
+      }, 500); // Debounce delay of half a second
+
+      setTimeoutId(newTimeoutId);
+    }
+  };
+
   return (
     <div className="w-full max-w-main relative flex flex-col">
       <input
         type="text"
         className="searchInput p-4"
         placeholder="search..."
-        onChange={(e) => handleSearch(e)}
+        onChange={handleSearchInputChange}
       />
       <div className="max-w-main w-full max-h-[75vh] absolute mt-16 flex flex-col body overflow-y-scroll z-10">
         {searchOptions &&
