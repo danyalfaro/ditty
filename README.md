@@ -36,7 +36,7 @@ cd ditty
 ```
 5. Create new file called .env.local
 ```
-mkdir .env.local
+touch .env.local
 ```
 6. Populate the new .env.local file with the following environment variables:
 ```
