@@ -317,11 +317,6 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
     });
   };
 
-  const onCancelChallenge = () => {
-    removeToken("challengePayload");
-    Router.push("/");
-  };
-
   const onCreationSubmit = async (
     category: ChallengeCategory,
     timeRange: ChallengeTimeRange

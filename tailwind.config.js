@@ -10,6 +10,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      animation: {
+        openMenu: "openMenu 0.2s cubic-bezier(0.23, 0.04, 0.65, 0.95)",
+      },
+      keyframes: {
+        openMenu: {
+          "0%": { left: "-300px" },
+          "100%": { left: "0px" },
+        },
+      },
       maxWidth: {
         main: "600px",
       },
