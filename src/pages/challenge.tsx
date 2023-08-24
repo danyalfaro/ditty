@@ -12,18 +12,16 @@ import {
   ChallengeTimeRange,
   ItemWrapper,
   LocalStorageToken,
-  TopItemsResponse,
   Track,
   User,
 } from "@/shared/models";
 import {
   decodeChallengeToken,
   encodeChallengeToken,
-  removeToken,
   storeToken,
 } from "@/shared/util";
-import Router, { useRouter } from "next/router";
-import { ChangeEvent, useEffect, useState } from "react";
+import Router from "next/router";
+import { useEffect, useState } from "react";
 import { useContext } from "react";
 
 enum ChallengePageState {
@@ -122,6 +120,7 @@ const initializeBoardTiles = (
   challengePayload: ChallengePayload
 ): BoardTile[] => {
   let boardTiles: BoardTile[] = [];
+  const { challengeCategory } = challengePayload;
   for (let i = 0; i < 10; i++) {
     boardTiles.push({
       data: null,
@@ -129,6 +128,7 @@ const initializeBoardTiles = (
       tries: 0,
       success: false,
       rank: i + 1,
+      type: challengeCategory,
     });
   }
   return boardTiles;
@@ -213,7 +213,6 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
   };
 
   const handleSearch = async (query: string) => {
-    // TODO: add debounce
     if (query.length > 1 && challengePayload) {
       const { challengeCategory } = challengePayload;
       const res = await searchItems(query, challengeCategory);

@@ -87,8 +87,6 @@ export const CHALLENGE_CATEGORY_SINGULAR_MAP: {
   [ChallengeCategory.SONGS]: "track",
 };
 
-export enum ChallengeCategoryToSearchTypeMap {}
-
 export enum ChallengeTimeRange {
   RECENT = "short_term",
   ALL_TIME = "long_term",
@@ -108,7 +106,34 @@ export type BoardTile = {
   tries: number;
   success: boolean;
   rank: number;
+  type: ChallengeCategory;
 };
+
+// export type BoardTile =
+//   | {
+//       data: Artist;
+//       id: string;
+//       tries: number;
+//       success: boolean;
+//       rank: number;
+//       type: ChallengeCategory.ARTISTS;
+//     }
+//   | {
+//       data: Track;
+//       id: string;
+//       tries: number;
+//       success: boolean;
+//       rank: number;
+//       type: ChallengeCategory.SONGS;
+//     }
+//   | {
+//       data: null;
+//       id: string;
+//       tries: number;
+//       success: boolean;
+//       rank: number;
+//       type: ChallengeCategory;
+//     };
 
 export type LocalStorageToken = {
   dateStamp: string; //ISO String,
