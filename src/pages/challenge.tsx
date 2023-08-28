@@ -2,7 +2,7 @@ import Board from "@/components/Board";
 import CreateGame from "@/components/create-challenge";
 import Layout from "@/components/Layout";
 import Search from "@/components/Search";
-import useSpotify, { getUserFromLoginCode, login } from "@/services/useSpotify";
+import useSpotify, { getUserFromLoginCode, login } from "@/hooks/useSpotify";
 import { AuthContext } from "@/shared/context";
 import {
   Artist,

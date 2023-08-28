@@ -3,20 +3,11 @@ import { LocalStorageToken, User } from "./models";
 
 type Auth = {
   user: User | undefined;
-  setUser: Dispatch<SetStateAction<User | undefined>> | undefined;
+  setUser: Dispatch<SetStateAction<User | undefined>>;
   accessToken: LocalStorageToken | undefined;
-  setAccessToken: Dispatch<any> | undefined;
+  setAccessToken: Dispatch<SetStateAction<LocalStorageToken | undefined>>;
   refreshToken: LocalStorageToken | undefined;
-  setRefreshToken: Dispatch<any> | undefined;
-};
-
-const authContextInitializer: Auth = {
-  user: undefined,
-  setUser: undefined,
-  accessToken: undefined,
-  setAccessToken: undefined,
-  refreshToken: undefined,
-  setRefreshToken: undefined,
+  setRefreshToken: Dispatch<SetStateAction<LocalStorageToken | undefined>>;
 };
 
 export const AuthContext = createContext<any>(null);

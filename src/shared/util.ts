@@ -1,4 +1,4 @@
-import { ChallengePayload, LocalStorageToken } from "./models";
+import { ChallengePayload, LocalStorageToken, ThemeConfig } from "./models";
 
 export const storeToken = (
   label: string,
@@ -9,6 +9,15 @@ export const storeToken = (
 
 export const removeToken = (label: string) => {
   localStorage.removeItem(label);
+};
+
+export const storeThemeConfig = (themeConfig: ThemeConfig) => {
+  localStorage.setItem("themeConfig", JSON.stringify(themeConfig));
+};
+
+export const getThemeConfig = (): ThemeConfig | null => {
+  const themeConfig = localStorage.getItem("themeConfig");
+  return themeConfig ? JSON.parse(themeConfig) : null;
 };
 
 export const challengeTokenToShareableLink = (
