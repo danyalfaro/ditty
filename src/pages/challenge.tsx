@@ -137,7 +137,7 @@ const initializeBoardTiles = (
 export const Challenge = (challengePageProps: ChallengePageProps) => {
   const { user, setUser, setAccessToken, setRefreshToken } =
     useContext(AuthContext);
-  const { getTopItems, searchItems } = useSpotify();
+  const { getTopItems, searchItems, getTopItemsByIds } = useSpotify();
   const [challengePayload, setChallengePayload] = useState<ChallengePayload>();
   const [searchOptions, setSearchOptions] = useState<ItemWrapper[]>([]);
   const [attemptedItems, setAttemptedItems] = useState<ItemWrapper[]>([]);
@@ -348,6 +348,19 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
     // TODO: SAVE PAYLOAD INTO LOCALSTORAGE, LOGIN TO SPOTIFY.
   };
 
+  const onShowAnswer = () => {
+    console.log("Answers coming...");
+    console.log(challengePayload?.challengeCategory, challengePayload?.items);
+    if (challengePayload?.challengeCategory && challengePayload?.items) {
+      console.log(
+        getTopItemsByIds(
+          challengePayload?.challengeCategory,
+          challengePayload?.items
+        )
+      );
+    }
+  };
+
   const getChallengePayload = async (
     category: ChallengeCategory,
     timeRange: ChallengeTimeRange
@@ -423,6 +436,7 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
             <Board boardTiles={boardTiles} />
           </div>
           {/* <SocialLinks /> */}
+          <button onClick={onShowAnswer}>Show me all</button>
           <div>
             {`Matched ${
               attemptedItems.filter((attempt) => attempt.isSuccess).length

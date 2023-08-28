@@ -154,6 +154,16 @@ const useSpotify = () => {
     return res.data.items;
   };
 
+  const getTopItemsByIds = async (
+    category: ChallengeCategory,
+    ids: string[]
+  ): Promise<Artist[] | Track[]> => {
+    const res = await spotify.get(`https://api.spotify.com/v1/${category}`, {
+      params: { ids: ids.join(",") },
+    });
+    return res.data.items;
+  };
+
   const searchItems = async (query: string, category: ChallengeCategory) => {
     const type = CHALLENGE_CATEGORY_SINGULAR_MAP[category];
     const res = await spotify.get(
@@ -162,7 +172,7 @@ const useSpotify = () => {
     return res.data[category].items;
   };
 
-  return { getUserProfile, getTopItems, searchItems };
+  return { getUserProfile, getTopItems, searchItems, getTopItemsByIds };
 };
 
 export default useSpotify;
