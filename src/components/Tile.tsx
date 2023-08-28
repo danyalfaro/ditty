@@ -1,4 +1,4 @@
-import { BoardTile } from "@/shared/models";
+import { BoardTile, ChallengeCategory } from "@/shared/models";
 import Image from "next/image";
 
 export default function Tile({
@@ -36,17 +36,10 @@ export default function Tile({
           (boardTile?.data ? "" : " motion-safe:animate-pulse")
         }
       >
-        {boardTile?.data &&
-        "images" in boardTile.data &&
-        boardTile.data.images[0]?.url ? (
-          <Image
-            className="rounded-full p-2"
-            src={`${boardTile.data.images[0].url}`}
-            alt={`Picture of ${boardTile.data.name}`}
-            fill={true}
-          />
+        {boardTile.type === ChallengeCategory.ARTISTS ? (
+          <ArtistTile boardTile={boardTile} />
         ) : (
-          ""
+          <SongTile boardTile={boardTile} />
         )}
         <div className="absolute w-full h-full bg-gradient-to-t from-slate-500 to-transparent flex justify-center items-end text-slate-50 pb-4">
           {boardTile.data?.name}
@@ -55,3 +48,33 @@ export default function Tile({
     </>
   );
 }
+
+const ArtistTile = ({ boardTile }: { boardTile: BoardTile }) => {
+  return boardTile?.data &&
+    "images" in boardTile.data &&
+    boardTile.data.images[0]?.url ? (
+    <Image
+      className="rounded-full p-2"
+      src={`${boardTile.data.images[0].url}`}
+      alt={`Picture of ${boardTile.data.name}`}
+      fill={true}
+    />
+  ) : (
+    <></>
+  );
+};
+
+const SongTile = ({ boardTile }: { boardTile: BoardTile }) => {
+  return boardTile?.data &&
+    "album" in boardTile.data &&
+    boardTile.data?.album?.images[0].url ? (
+    <Image
+      className="rounded-full p-2"
+      src={`${boardTile.data?.album?.images[0].url}`}
+      alt={`Picture of ${boardTile.data.name}`}
+      fill={true}
+    />
+  ) : (
+    <></>
+  );
+};

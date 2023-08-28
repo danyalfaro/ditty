@@ -1,7 +1,6 @@
 import { ItemWrapper } from "@/shared/models";
 import Image from "next/image";
 import { useState } from "react";
-import _ from "lodash";
 
 export const Search = ({
   searchOptions,
@@ -58,6 +57,16 @@ export const Search = ({
                   {"images" in item && item?.images[0]?.url ? (
                     <Image
                       src={`${item.images[0].url}`}
+                      alt={`Picture of ${item.name}`}
+                      width={50}
+                      height={50}
+                    />
+                  ) : (
+                    ""
+                  )}
+                  {"album" in item && item?.album?.images[0].url ? (
+                    <Image
+                      src={`${item?.album?.images[0].url}`}
                       alt={`Picture of ${item.name}`}
                       width={50}
                       height={50}
