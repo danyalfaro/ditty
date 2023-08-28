@@ -3,6 +3,7 @@ import { removeToken } from "@/shared/util";
 import Router from "next/router";
 import { useContext, useState } from "react";
 import { RxHamburgerMenu, RxCross1 } from "react-icons/rx";
+import ThemeColorToggle from "./ThemeColorToggle";
 
 export default function TopBar() {
   const [isSideMenuExpanded, setIsSideMenuExpanded] = useState(false);
@@ -26,13 +27,16 @@ export default function TopBar() {
     <>
       <div className="flex justify-center items-center w-full">
         <div className="flex justify-between items-center w-full px-8 py-4">
-          <div className="cursor-pointer p-2 border-solid border-transparent border-2 rounded hover:border-slate-200 dark:hover:border-slate-800">
+          <button
+            className="cursor-pointer p-2 border-solid border-transparent border-2 rounded hover:border-slate-200 dark:hover:border-slate-500"
+            onClick={onToggleMenu}
+          >
             {!isSideMenuExpanded ? (
-              <RxHamburgerMenu size={"24px"} onClick={onToggleMenu} />
+              <RxHamburgerMenu size={"24px"} />
             ) : (
-              <RxCross1 size={"24px"} onClick={onToggleMenu} />
+              <RxCross1 size={"24px"} />
             )}
-          </div>
+          </button>
           <h1 className="text-4xl">DITTY</h1>
           {user && (
             <div
@@ -53,7 +57,7 @@ export default function TopBar() {
         <div className="flex">
           <div className="absolute z-20 h-[calc(100%-80px)] w-full sm:w-[320px] bg-slate-400 bg-opacity-60 text-slate-800 animate-openMenu">
             <div className="h-full flex flex-col justify-between">
-              <div></div>
+              <ThemeColorToggle />
               <div className="m-4">
                 <button
                   type="button"

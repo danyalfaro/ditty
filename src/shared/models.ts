@@ -152,6 +152,10 @@ export type User = {
   uri: string;
 };
 
+export type ThemeConfig = {
+  prefersDarkMode: boolean | null;
+};
+
 export type SpotifyTokenResponse = {
   access_token: string;
   token_type: string;

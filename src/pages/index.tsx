@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Layout from "@/components/Layout";
-import { login } from "@/services/useSpotify";
+import { login } from "@/hooks/useSpotify";
 
 export default function Home() {
   const onSpotifyLogin = () => {
