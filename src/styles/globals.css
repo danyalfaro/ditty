@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --max-width: 1100px;
   --border-radius: 12px;
@@ -33,6 +37,9 @@
     #00000010,
     #00000080
   );
+
+  --linear-glow: linear-gradient(to top left, #b3b3b3, #64e4e6, #6480e6, #b3b3b3);
+  /* --linear-glow: linear-gradient(90deg, #ee6352, purple, #1f678d); */
 
   --callout-rgb: 238, 240, 241;
   --callout-border-rgb: 172, 175, 176;
@@ -73,6 +80,21 @@
   }
 }
 
+@keyframes gradient-animation {
+  0% {
+    background-position: left;
+  }
+  100% {
+    background-position: right;
+  }
+}
+
+#board{
+  background-image: var(--linear-glow);
+  background-size: 500%;
+  animation: gradient-animation 5s infinite alternate;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -85,14 +107,8 @@ body {
   overflow-x: hidden;
 }
 
-body {
+.body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
 }
 
 a {
@@ -105,3 +121,9 @@ a {
     color-scheme: dark;
   }
 }
+
+button:disabled{
+  opacity: 33%;
+  pointer-events: none;
+}
+

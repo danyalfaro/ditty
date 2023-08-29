@@ -1,10 +1,53 @@
-import { ChallengePayload } from "./models";
+import { ChallengePayload, LocalStorageToken, ThemeConfig } from "./models";
 
-export const decodeChallengeToken = (token: string): string => {
-  console.log("Decoding...");
-  const decoded = Buffer.from(token, "hex").toString();
-  console.log(decoded);
-  return decoded;
+export const storeToken = (
+  label: string,
+  token: LocalStorageToken | ChallengePayload
+) => {
+  localStorage.setItem(label, JSON.stringify(token));
+};
+
+export const removeToken = (label: string) => {
+  localStorage.removeItem(label);
+};
+
+export const storeThemeConfig = (themeConfig: ThemeConfig) => {
+  localStorage.setItem("themeConfig", JSON.stringify(themeConfig));
+};
+
+export const getThemeConfig = (): ThemeConfig | null => {
+  const themeConfig = localStorage.getItem("themeConfig");
+  return themeConfig ? JSON.parse(themeConfig) : null;
+};
+
+export const challengeTokenToShareableLink = (
+  challengeToken: string
+): string => {
+  return `${process.env.NEXT_PUBLIC_CHALLENGE_URI}?challengeToken=${challengeToken}`;
+};
+
+export const tokenToTokenWrapper = (
+  token: string,
+  expiresIn: number | null = null
+): LocalStorageToken => {
+  return {
+    dateStamp: new Date().toISOString(),
+    expiresIn: expiresIn,
+    token: token.toString(),
+  };
+};
+
+export const decodeChallengeToken = (
+  token: string
+): ChallengePayload | null => {
+  if (!token) return null;
+  try {
+    const decoded = Buffer.from(token, "hex").toString();
+    return JSON.parse(decoded);
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
 };
 
 export const encodeChallengeToken = (
@@ -12,9 +55,7 @@ export const encodeChallengeToken = (
 ): string => {
   if (challengePayload) {
     const payload = JSON.stringify(challengePayload);
-    console.log("Encoding: ", payload);
     const encoded = Buffer.from(payload).toString("hex");
-    console.log(encoded);
     decodeChallengeToken(encoded);
     return encoded;
   } else return "";

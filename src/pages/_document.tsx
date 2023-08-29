@@ -4,10 +4,10 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head />
-      <body>
+      <body className="bg-gradient-to-b from-[#D6DBDC] to-white dark:from-gray-800 dark:to-gray-700">
         <Main />
         <NextScript />
       </body>
     </Html>
-  )
+  );
 }
