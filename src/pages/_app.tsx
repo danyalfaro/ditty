@@ -1,4 +1,9 @@
-import { LocalStorageToken, User } from "@/shared/models";
+import {
+  ChallengeCategory,
+  ChallengePayload,
+  LocalStorageToken,
+  User,
+} from "@/shared/models";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { useState } from "react";

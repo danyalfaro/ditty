@@ -31,7 +31,7 @@ export const Search = ({
     <div className="w-full max-w-main relative flex flex-col">
       <input
         type="text"
-        className="searchInput p-4"
+        className="p-4 bg-slate-50 dark:bg-slate-500 text-slate-800 dark:text-slate-100 placeholder:text-slate-800 placeholder:dark:text-slate-100"
         placeholder="search..."
         onChange={handleSearchInputChange}
       />

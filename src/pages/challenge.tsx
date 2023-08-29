@@ -3,7 +3,7 @@ import CreateGame from "@/components/create-challenge";
 import Layout from "@/components/Layout";
 import Search from "@/components/Search";
 import useSpotify, { getUserFromLoginCode, login } from "@/hooks/useSpotify";
-import { AuthContext } from "@/shared/context";
+import { AuthContext, ChallengeContext } from "@/shared/context";
 import {
   Artist,
   BoardTile,
@@ -137,8 +137,13 @@ const initializeBoardTiles = (
 export const Challenge = (challengePageProps: ChallengePageProps) => {
   const { user, setUser, setAccessToken, setRefreshToken } =
     useContext(AuthContext);
+  const { getTopItemsByIds } = useSpotify();
   const { getTopItems, searchItems } = useSpotify();
-  const [challengePayload, setChallengePayload] = useState<ChallengePayload>();
+  const [challengePayload, setChallengePayload] = useState<ChallengePayload>({
+    challenger: "",
+    challengeCategory: ChallengeCategory.UNDEFINED,
+    items: [],
+  });
   const [searchOptions, setSearchOptions] = useState<ItemWrapper[]>([]);
   const [attemptedItems, setAttemptedItems] = useState<ItemWrapper[]>([]);
   const [boardTiles, setBoardTiles] = useState<BoardTile[]>([]);
@@ -169,7 +174,6 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
           undefined,
           { shallow: true }
         );
-
         setChallengePageState(ChallengePageState.GAMEPLAY);
       } else {
         setChallengePageState(ChallengePageState.CREATION);
@@ -348,6 +352,22 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
     // TODO: SAVE PAYLOAD INTO LOCALSTORAGE, LOGIN TO SPOTIFY.
   };
 
+  const onGiveUp = async () => {
+    if (challengePayload?.challengeCategory && challengePayload?.items) {
+      const topItems = await getTopItemsByIds(
+        challengePayload?.challengeCategory,
+        challengePayload?.items
+      );
+
+      boardTiles.forEach((tile, index) => {
+        if (!tile.success) {
+          const item = topItems.find((item) => item.id === tile.id);
+          if (item) onItemSelection(item);
+        }
+      });
+    }
+  };
+
   const getChallengePayload = async (
     category: ChallengeCategory,
     timeRange: ChallengeTimeRange
@@ -370,67 +390,75 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
   };
 
   return (
-    <Layout>
-      {challengePageState === ChallengePageState.LOADING && (
-        <div>LOADING...</div>
-      )}
-      {challengePageState === ChallengePageState.ERROR && <div>ERROR...</div>}
-      {challengePageState === ChallengePageState.CREATION && (
-        <CreateGame onSubmit={onCreationSubmit} />
-      )}
-      {challengePageState === ChallengePageState.PROMPT && (
-        <>
-          <h1>
-            WELCOME! you have been sent a game :) login to spotify to play :)
-          </h1>
-          <button
-            type="button"
-            onClick={handleAcceptChallenge}
-            className="bg-green-600 text-slate-100 p-4 border-solid rounded-md w-full"
-          >
-            Login With Spotify
-          </button>
-        </>
-      )}
-      {challengePageState === ChallengePageState.GAMEPLAY && (
-        <>
-          <div className="py-2 w-full">
-            <Search
-              handleSearch={handleSearch}
-              searchOptions={searchOptions}
-              onItemSelection={onItemSelection}
-            />
-          </div>
-          <div tabIndex={0} className="w-full hidden sm:flex justify-between">
+    <ChallengeContext.Provider
+      value={{
+        challengePayload,
+        setChallengePayload,
+        onGiveUp,
+      }}
+    >
+      <Layout>
+        {challengePageState === ChallengePageState.LOADING && (
+          <div>LOADING...</div>
+        )}
+        {challengePageState === ChallengePageState.ERROR && <div>ERROR...</div>}
+        {challengePageState === ChallengePageState.CREATION && (
+          <CreateGame onSubmit={onCreationSubmit} />
+        )}
+        {challengePageState === ChallengePageState.PROMPT && (
+          <>
             <h1>
-              <span className="font-bold">Challenge sent by: </span>
-              <span>{challengePayload?.challenger}</span>
+              WELCOME! you have been sent a game :) login to spotify to play :)
             </h1>
-            <h1>
-              <span className="font-bold">Category: </span>
-              <span>
-                {challengePayload
-                  ? challengePayload?.challengeCategory
-                      .charAt(0)
-                      .toUpperCase() +
-                    challengePayload?.challengeCategory.slice(1)
-                  : ""}
-              </span>
-            </h1>
-          </div>
+            <button
+              type="button"
+              onClick={handleAcceptChallenge}
+              className="bg-green-600 text-slate-100 p-4 border-solid rounded-md w-full"
+            >
+              Login With Spotify
+            </button>
+          </>
+        )}
+        {challengePageState === ChallengePageState.GAMEPLAY && (
+          <>
+            <div className="py-2 w-full">
+              <Search
+                handleSearch={handleSearch}
+                searchOptions={searchOptions}
+                onItemSelection={onItemSelection}
+              />
+            </div>
+            <div tabIndex={0} className="w-full hidden sm:flex justify-between">
+              <h1>
+                <span className="font-bold">Challenge sent by: </span>
+                <span>{challengePayload?.challenger}</span>
+              </h1>
+              <h1>
+                <span className="font-bold">Category: </span>
+                <span>
+                  {challengePayload
+                    ? challengePayload?.challengeCategory
+                        .charAt(0)
+                        .toUpperCase() +
+                      challengePayload?.challengeCategory.slice(1)
+                    : ""}
+                </span>
+              </h1>
+            </div>
 
-          <div className="py-4">
-            <Board boardTiles={boardTiles} />
-          </div>
-          {/* <SocialLinks /> */}
-          <div>
-            {`Matched ${
-              attemptedItems.filter((attempt) => attempt.isSuccess).length
-            } in ${attemptedItems.length} attempts.`}
-          </div>
-        </>
-      )}
-    </Layout>
+            <div className="py-4">
+              <Board boardTiles={boardTiles} />
+            </div>
+            {/* <SocialLinks /> */}
+            <div>
+              {`Matched ${
+                attemptedItems.filter((attempt) => attempt.isSuccess).length
+              } in ${attemptedItems.length} attempts.`}
+            </div>
+          </>
+        )}
+      </Layout>
+    </ChallengeContext.Provider>
   );
 };
 

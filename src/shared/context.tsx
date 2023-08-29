@@ -1,13 +1,34 @@
 import { createContext, Dispatch, SetStateAction } from "react";
-import { LocalStorageToken, User } from "./models";
+import {
+  ChallengeCategory,
+  ChallengePayload,
+  LocalStorageToken,
+  User,
+} from "./models";
 
-type Auth = {
-  user: User | undefined;
-  setUser: Dispatch<SetStateAction<User | undefined>>;
-  accessToken: LocalStorageToken | undefined;
-  setAccessToken: Dispatch<SetStateAction<LocalStorageToken | undefined>>;
-  refreshToken: LocalStorageToken | undefined;
-  setRefreshToken: Dispatch<SetStateAction<LocalStorageToken | undefined>>;
+// type Auth = {
+//   user: User | undefined;
+//   setUser: Dispatch<SetStateAction<User | undefined>>;
+//   accessToken: LocalStorageToken | undefined;
+//   setAccessToken: Dispatch<SetStateAction<LocalStorageToken | undefined>>;
+//   refreshToken: LocalStorageToken | undefined;
+//   setRefreshToken: Dispatch<SetStateAction<LocalStorageToken | undefined>>;
+// };
+
+type Challenge = {
+  challengePayload: ChallengePayload;
+  setChallengePayload: Dispatch<SetStateAction<ChallengePayload>>;
+  onGiveUp: () => void;
 };
 
+// TODO - Improve typing of contexts
 export const AuthContext = createContext<any>(null);
+export const ChallengeContext = createContext<Challenge>({
+  challengePayload: {
+    challenger: "",
+    challengeCategory: ChallengeCategory.UNDEFINED,
+    items: [],
+  },
+  setChallengePayload: () => {},
+  onGiveUp: () => {},
+});
