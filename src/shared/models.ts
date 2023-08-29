@@ -78,6 +78,7 @@ export type ChallengePayload = {
 export enum ChallengeCategory {
   ARTISTS = "artists",
   SONGS = "tracks",
+  UNDEFINED = "undefined",
 }
 
 export const CHALLENGE_CATEGORY_SINGULAR_MAP: {
@@ -85,6 +86,7 @@ export const CHALLENGE_CATEGORY_SINGULAR_MAP: {
 } = {
   [ChallengeCategory.ARTISTS]: "artist",
   [ChallengeCategory.SONGS]: "track",
+  [ChallengeCategory.UNDEFINED]: "",
 };
 
 export enum ChallengeTimeRange {

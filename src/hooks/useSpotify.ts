@@ -157,11 +157,11 @@ const useSpotify = () => {
   const getTopItemsByIds = async (
     category: ChallengeCategory,
     ids: string[]
-  ): Promise<Artist[] | Track[]> => {
+  ): Promise<(Artist | Track)[]> => {
     const res = await spotify.get(`https://api.spotify.com/v1/${category}`, {
       params: { ids: ids.join(",") },
     });
-    return res.data.items;
+    return res.data[category];
   };
 
   const searchItems = async (query: string, category: ChallengeCategory) => {

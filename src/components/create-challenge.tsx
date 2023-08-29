@@ -10,7 +10,9 @@ export const CreateGame = ({ onSubmit }: { onSubmit: any }) => {
 
   return (
     <>
-      <div>Can anyone guess your Top Ditty? Share Your Link To Find Out...</div>
+      <div className="text-slate-800 dark:text-slate-300">
+        Can anyone guess your Top Ditty? Share Your Link To Find Out...
+      </div>
       <div className="w-full">
         <label className="w-full text-left">Category</label>
         <div className="inline-flex w-full" id="categoryButtonGroup">
