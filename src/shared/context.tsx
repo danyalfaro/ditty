@@ -19,6 +19,7 @@ type Challenge = {
   challengePayload: ChallengePayload;
   setChallengePayload: Dispatch<SetStateAction<ChallengePayload>>;
   onGiveUp: () => void;
+  setModalIsOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 // TODO - Improve typing of contexts
@@ -31,4 +32,5 @@ export const ChallengeContext = createContext<Challenge>({
   },
   setChallengePayload: () => {},
   onGiveUp: () => {},
+  setModalIsOpen: () => {},
 });

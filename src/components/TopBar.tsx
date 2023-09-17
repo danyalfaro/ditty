@@ -3,6 +3,7 @@ import { removeToken } from "@/shared/util";
 import Router from "next/router";
 import { useContext, useState } from "react";
 import { RxHamburgerMenu, RxCross1 } from "react-icons/rx";
+import SocialLinks from "./SocialLinks";
 import ThemeColorToggle from "./ThemeColorToggle";
 
 export default function TopBar() {
@@ -31,7 +32,7 @@ export default function TopBar() {
   return (
     <>
       <div className="flex justify-center items-center w-full">
-        <div className="flex justify-between items-center w-full px-8 py-4">
+        <div className="flex justify-between items-center w-full  max-w-[1900px] min-w-[280px] px-8 py-4">
           {isLoggedIn() ? (
             <button
               className="cursor-pointer p-2 border-solid border-transparent border-2 rounded hover:border-slate-200 dark:hover:border-slate-500"
@@ -74,16 +75,16 @@ export default function TopBar() {
       </div>
       {isSideMenuExpanded && (
         <div className="flex">
-          <div className="absolute z-20 h-[calc(100%-80px)] w-full sm:w-[320px] bg-slate-400 bg-opacity-60 text-slate-800 animate-openMenu">
+          <div className="absolute z-30 h-[calc(100%-80px)] w-full sm:w-[320px] bg-slate-300 text-slate-800 animate-openMenu">
             <div className="h-full flex flex-col justify-between p-4">
               <div>
                 <ThemeColorToggle />
               </div>
-              <div>
+              <div className="flex flex-col justify-between h-1/4 max-h-60">
                 <button
                   type="button"
                   onClick={onGiveUp}
-                  className="bg-slate-100 text-slate-800 w-full p-4 border-solid rounded-md mb-4"
+                  className="bg-slate-100 text-slate-800 w-full p-4 border-solid rounded-md"
                 >
                   Give Up
                 </button>
@@ -94,6 +95,7 @@ export default function TopBar() {
                 >
                   Abandon Challenge
                 </button>
+                <SocialLinks />
               </div>
             </div>
           </div>
