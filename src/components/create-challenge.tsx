@@ -1,5 +1,6 @@
 import { ChallengeCategory, ChallengeTimeRange } from "@/shared/models";
 import { useState } from "react";
+import SelectButton from "./SelectButton";
 
 export const CreateGame = ({ onSubmit }: { onSubmit: any }) => {
   const [challengeCategory, setChallengeCategory] = useState<ChallengeCategory>(
@@ -8,6 +9,21 @@ export const CreateGame = ({ onSubmit }: { onSubmit: any }) => {
   const [challengeTimeRange, setChallengeTimeRange] =
     useState<ChallengeTimeRange>(ChallengeTimeRange.RECENT);
 
+  const onToggleChallengeCategory = () => {
+    setChallengeCategory((prev) => {
+      if (prev === ChallengeCategory.SONGS) {
+        return ChallengeCategory.ARTISTS;
+      } else return ChallengeCategory.SONGS;
+    });
+  };
+
+  const onToggleTimeRange = () => {
+    setChallengeTimeRange((prev) => {
+      if (prev === ChallengeTimeRange.ALL_TIME) {
+        return ChallengeTimeRange.RECENT;
+      } else return ChallengeTimeRange.ALL_TIME;
+    });
+  };
   return (
     <>
       <div className="text-slate-800 dark:text-slate-300">
@@ -15,57 +31,21 @@ export const CreateGame = ({ onSubmit }: { onSubmit: any }) => {
       </div>
       <div className="w-full">
         <label className="w-full text-left">Category</label>
-        <div className="inline-flex w-full" id="categoryButtonGroup">
-          <button
-            onClick={() => setChallengeCategory(ChallengeCategory.SONGS)}
-            className={
-              "font-bold py-2 px-4 rounded-l w-1/2 transition-colors duration-500 " +
-              (challengeCategory === ChallengeCategory.SONGS
-                ? "bg-black text-gray-300"
-                : "bg-gray-300 text-gray-800")
-            }
-          >
-            Songs
-          </button>
-          <button
-            onClick={() => setChallengeCategory(ChallengeCategory.ARTISTS)}
-            className={
-              "font-bold py-2 px-4 rounded-r w-1/2 transition-colors duration-500 " +
-              (challengeCategory === ChallengeCategory.ARTISTS
-                ? "bg-black text-gray-300"
-                : "bg-gray-300 text-gray-800")
-            }
-          >
-            Artists
-          </button>
-        </div>
+        <SelectButton
+          checked={challengeCategory === ChallengeCategory.ARTISTS}
+          onChange={onToggleChallengeCategory}
+          onLabel="Artists"
+          offLabel="Songs"
+        />
       </div>
       <div className="w-full">
         <label className="w-full text-left">Time Range</label>
-        <div className="inline-flex w-full">
-          <button
-            onClick={() => setChallengeTimeRange(ChallengeTimeRange.RECENT)}
-            className={
-              "font-bold py-2 px-4 rounded-l w-1/2 transition-colors duration-500 " +
-              (challengeTimeRange === ChallengeTimeRange.RECENT
-                ? "bg-black text-gray-300"
-                : "bg-gray-300 text-gray-800")
-            }
-          >
-            Recent
-          </button>
-          <button
-            onClick={() => setChallengeTimeRange(ChallengeTimeRange.ALL_TIME)}
-            className={
-              "font-bold py-2 px-4 rounded-r w-1/2 transition-colors duration-500 " +
-              (challengeTimeRange === ChallengeTimeRange.ALL_TIME
-                ? "bg-black text-gray-300"
-                : "bg-gray-300 text-gray-800")
-            }
-          >
-            All Time
-          </button>
-        </div>
+        <SelectButton
+          checked={challengeTimeRange === ChallengeTimeRange.ALL_TIME}
+          onChange={onToggleTimeRange}
+          onLabel="All Time"
+          offLabel="Recent"
+        />
       </div>
 
       <button

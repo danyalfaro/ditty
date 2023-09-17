@@ -1,4 +1,3 @@
-import useSpotify from "@/hooks/useSpotify";
 import { AuthContext, ChallengeContext } from "@/shared/context";
 import { removeToken } from "@/shared/util";
 import Router from "next/router";
@@ -10,7 +9,7 @@ export default function TopBar() {
   const [isSideMenuExpanded, setIsSideMenuExpanded] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
   const { user } = useContext(AuthContext);
-  const { challengePayload, onGiveUp } = useContext(ChallengeContext);
+  const { onGiveUp } = useContext(ChallengeContext);
 
   const onToggleMenu = () => {
     setIsSideMenuExpanded((prev) => !prev);
