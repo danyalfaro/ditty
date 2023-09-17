@@ -16,8 +16,8 @@ module.exports = {
       },
       keyframes: {
         openMenu: {
-          "0%": { left: "-300px" },
-          "100%": { left: "0px" },
+          "0%": { left: "-300px", opacity: "0%" },
+          "100%": { left: "0px", opacity: "100%" },
         },
       },
       maxWidth: {
@@ -25,6 +25,9 @@ module.exports = {
       },
       minWidth: {
         main: "216px",
+      },
+      spacing: {
+        "screen-dvh": "100dvh",
       },
     },
   },
