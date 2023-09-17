@@ -1,6 +1,7 @@
 import Board from "@/components/Board";
 import CreateGame from "@/components/create-challenge";
 import Layout from "@/components/Layout";
+import ResultsModal from "@/components/ResultsModal";
 import Search from "@/components/Search";
 import useSpotify, { getUserFromLoginCode, login } from "@/hooks/useSpotify";
 import { AuthContext, ChallengeContext } from "@/shared/context";
@@ -144,6 +145,7 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
     challengeCategory: ChallengeCategory.UNDEFINED,
     items: [],
   });
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [searchOptions, setSearchOptions] = useState<ItemWrapper[]>([]);
   const [attemptedItems, setAttemptedItems] = useState<ItemWrapper[]>([]);
   const [boardTiles, setBoardTiles] = useState<BoardTile[]>([]);
@@ -395,6 +397,7 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
         challengePayload,
         setChallengePayload,
         onGiveUp,
+        setModalIsOpen,
       }}
     >
       <Layout>
@@ -457,6 +460,11 @@ export const Challenge = (challengePageProps: ChallengePageProps) => {
             </div>
           </>
         )}
+        <ResultsModal
+          isOpen={modalIsOpen}
+          boardTiles={boardTiles}
+          attemptCount={attemptedItems.length}
+        />
       </Layout>
     </ChallengeContext.Provider>
   );
