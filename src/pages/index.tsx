@@ -21,8 +21,13 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Layout>
-        <div></div>
+      <Layout showTopBar={false}>
+        <div className="text-center mt-10">
+          <div>GUESS YOUR TOP</div>
+          <div className="bg-clip-text text-8xl p-2 text-transparent bg-gradient-to-r from-[#1DB954] via-slate-100 to-[#1DB954] bg-[length:400%] animate-textGradient">
+            Ditty
+          </div>
+        </div>
         <div className="w-full">
           <button
             type="button"
