@@ -46,16 +46,18 @@ export const Search = ({
         onChange={handleSearchInputChange}
         value={inputValue}
       />
-      <button
-        className="absolute right-0 p-4 text-slate-400"
-        onClick={() =>
-          handleSearchInputChange({
-            target: { value: "" },
-          } as ChangeEvent<HTMLInputElement>)
-        }
-      >
-        clear
-      </button>
+      {inputValue.length > 0 && (
+        <button
+          className="absolute right-0 p-4 text-slate-400"
+          onClick={() =>
+            handleSearchInputChange({
+              target: { value: "" },
+            } as ChangeEvent<HTMLInputElement>)
+          }
+        >
+          clear
+        </button>
+      )}
       <div className="max-w-main w-full max-h-[75vh] absolute mt-16 flex flex-col body overflow-y-scroll z-20">
         {searchOptions &&
           searchOptions?.map(
