@@ -6,7 +6,7 @@ import { RxHamburgerMenu, RxCross1 } from "react-icons/rx";
 import SocialLinks from "./SocialLinks";
 import ThemeColorToggle from "./ThemeColorToggle";
 
-export default function TopBar() {
+export default function TopBar({ showTitle = true }) {
   const [isSideMenuExpanded, setIsSideMenuExpanded] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
   const { user } = useContext(AuthContext);
@@ -53,9 +53,11 @@ export default function TopBar() {
           ) : (
             <ThemeColorToggle />
           )}
-          <h1 className="text-4xl text-slate-800 transition-colors duration-700 dark:text-slate-300">
-            DITTY
-          </h1>
+          {showTitle && (
+            <h1 className="text-4xl text-slate-800 transition-colors duration-700 dark:text-slate-300">
+              DITTY
+            </h1>
+          )}
           {isLoggedIn() ? (
             <div
               className="bg-gray-400 dark:text-slate-50 text-slate-700 w-12 h-12 flex justify-center items-center rounded-full hover:cursor-pointer"
