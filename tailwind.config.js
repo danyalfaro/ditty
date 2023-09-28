@@ -38,6 +38,10 @@ module.exports = {
       spacing: {
         "screen-dvh": "100dvh",
       },
+      content: {
+        lightTheme: 'url("../assets/light-theme.svg")',
+        darkTheme: 'url("../assets/dark-theme.svg")',
+      },
     },
   },
   plugins: [],
